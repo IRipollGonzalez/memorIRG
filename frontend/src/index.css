@@ -42,6 +42,8 @@
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-info: var(--info);
+  --color-card-front: var(--card-front);
+  --color-card-back: var(--card-back);
 }
 
 :root {

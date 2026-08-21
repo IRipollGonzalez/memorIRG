@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { SessionState } from "@/types/session";
 
 interface FlashcardViewProps {
@@ -45,7 +46,10 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: 
       </p>
 
       <Card
-        className="flex h-56 w-full max-w-xl cursor-pointer flex-col items-center justify-center gap-3 px-6 text-center transition-transform hover:scale-[1.01] sm:h-72 sm:px-8"
+        className={cn(
+          "flex h-56 w-full max-w-xl cursor-pointer flex-col items-center justify-center gap-3 px-6 text-center transition-colors duration-200 hover:scale-[1.01] sm:h-72 sm:px-8",
+          session.is_flipped ? "bg-card-back" : "bg-card-front",
+        )}
         onClick={onFlip}
         data-testid="flashcard"
       >
@@ -54,7 +58,7 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: 
         <span className="text-xs text-muted-foreground">Tap to flip</span>
       </Card>
 
-      <div className="grid w-full max-w-xl grid-cols-3 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
+      <div className="grid w-full max-w-xl grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
         <Button
           variant="outline"
           size="lg"
@@ -62,9 +66,6 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: 
           disabled={!session.can_go_previous || pending}
         >
           Previous
-        </Button>
-        <Button variant="secondary" size="lg" onClick={onFlip} disabled={pending}>
-          Flip
         </Button>
         <Button size="lg" onClick={onNext} disabled={!session.can_go_next || pending}>
           Next

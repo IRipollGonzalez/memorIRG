@@ -63,4 +63,25 @@ describe("FlashcardView", () => {
     expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
   });
+
+  it("has no separate Flip button — tapping the card is the only way to flip", () => {
+    render(<FlashcardView session={baseSession} onFlip={vi.fn()} onNext={vi.fn()} onPrevious={vi.fn()} pending={false} />);
+    expect(screen.queryByRole("button", { name: /flip/i })).not.toBeInTheDocument();
+  });
+
+  it("gives each side a different background so flipping is visible, not just textual", () => {
+    render(<FlashcardView session={baseSession} onFlip={vi.fn()} onNext={vi.fn()} onPrevious={vi.fn()} pending={false} />);
+    expect(screen.getByTestId("flashcard")).toHaveClass("bg-card-front");
+
+    render(
+      <FlashcardView
+        session={{ ...baseSession, is_flipped: true }}
+        onFlip={vi.fn()}
+        onNext={vi.fn()}
+        onPrevious={vi.fn()}
+        pending={false}
+      />,
+    );
+    expect(screen.getAllByTestId("flashcard")[1]).toHaveClass("bg-card-back");
+  });
 });
