@@ -1,0 +1,196 @@
+category,pais,capital
+Africa,Argelia,Argel
+Africa,Angola,Luanda
+Africa,Benin,Porto-Novo
+Africa,Botsuana,Gaborone
+Africa,Burkina Faso,Ouagadougou
+Africa,Burundi,Gitega
+Africa,Cabo Verde,Praia
+Africa,Camerun,Yaundé
+Africa,Republica Centroafricana,Bangui
+Africa,Chad,Ndjamena
+Africa,Comoras,Moroni
+Africa,Costa de Marfil,Yamusukro
+Africa,Republica Democratica del Congo,Kinsasa
+Africa,Yibuti,Yibuti
+Africa,Egipto,El Cairo
+Africa,Guinea Ecuatorial,Malabo
+Africa,Eritrea,Asmara
+Africa,Esuatini,Mbabane
+Africa,Etiopia,Adis Abeba
+Africa,Gabon,Libreville
+Africa,Ghana,Accra
+Africa,Guinea,Conakri
+Africa,Guinea-Bisau,Bisau
+Africa,Kenia,Nairobi
+Africa,Lesoto,Maseru
+Africa,Liberia,Monrovia
+Africa,Libia,Tripoli
+Africa,Madagascar,Antananarivo
+Africa,Malaui,Lilongüe
+Africa,Mali,Bamako
+Africa,Mauritania,Nuakchot
+Africa,Mauricio,Port Louis
+Africa,Marruecos,Rabat
+Africa,Mozambique,Maputo
+Africa,Namibia,Vindhoek
+Africa,Niger,Niamey
+Africa,Nigeria,Abuya
+Africa,Republica del Congo,Brazzaville
+Africa,Ruanda,Kigali
+Africa,Santo Tome y Principe,Santo Tome
+Africa,Senegal,Dakar
+Africa,Seychelles,Victoria
+Africa,Sierra Leona,Freetown
+Africa,Somalia,Mogadiscio
+Africa,Sudafrica,Pretoria
+Africa,Sudan del Sur,Yuba
+Africa,Sudan,Jartum
+Africa,Tanzania,Dodoma
+Africa,Gambia,Banjul
+Africa,Togo,Lome
+Africa,Tunez,Tunez
+Africa,Uganda,Kampala
+Africa,Zambia,Lusaka
+Africa,Zimbabue,Harare
+America,Antigua y Barbuda,Saint John's
+America,Argentina,Buenos Aires
+America,Bahamas,Nasau
+America,Barbados,Bridgetown
+America,Belice,Belmopan
+America,Bolivia,Sucre
+America,Brasil,Brasilia
+America,Canada,Ottawa
+America,Chile,Santiago
+America,Colombia,Bogota
+America,Costa Rica,San Jose
+America,Cuba,La Habana
+America,Dominica,Roseau
+America,Republica Dominicana,Santo Domingo
+America,Ecuador,Quito
+America,El Salvador,San Salvador
+America,Granada,Saint George's
+America,Guatemala,Ciudad de Guatemala
+America,Guyana,Georgetown
+America,Haiti,Puerto Principe
+America,Honduras,Tegucigalpa
+America,Jamaica,Kingston
+America,Mexico,Ciudad de Mexico
+America,Nicaragua,Managua
+America,Panama,Ciudad de Panama
+America,Paraguay,Asuncion
+America,Peru,Lima
+America,San Cristobal y Nieves,Basseterre
+America,Santa Lucia,Castries
+America,San Vicente y las Granadinas,Kingstown
+America,Surinam,Paramaribo
+America,Trinidad y Tobago,Puerto España
+America,Estados Unidos,Washington D.C.
+America,Uruguay,Montevideo
+America,Venezuela,Caracas
+Asia,Afganistan,Kabul
+Asia,Armenia,Erevan
+Asia,Azerbaiyan,Baku
+Asia,Bahrein,Manama
+Asia,Bangladesh,Daca
+Asia,Bhutan,Timbu
+Asia,Brunei,Bandar Seri Begawan
+Asia,Camboya,Nom Pen
+Asia,China,Pekin
+Asia,Chipre,Nicosia
+Asia,Georgia,Tiflis
+Asia,India,Nueva Delhi
+Asia,Indonesia,Yakarta
+Asia,Iran,Teheran
+Asia,Irak,Bagdad
+Asia,Israel,Jerusalen
+Asia,Japon,Tokio
+Asia,Jordania,Aman
+Asia,Kazajistan,Astana
+Asia,Kuwait,Kuwait
+Asia,Kirguistan,Biskek
+Asia,Laos,Vientian
+Asia,Libano,Beirut
+Asia,Malasia,Kuala Lumpur
+Asia,Maldivas,Male
+Asia,Mongolia,Ulan Bator
+Asia,Myanmar,Naipyido
+Asia,Nepal,Kathmandu
+Asia,Corea del Norte,Pionyang
+Asia,Oman,Muscat
+Asia,Pakistan,Islamabad
+Asia,Palestina,Jerusalen Este
+Asia,Filipinas,Manila
+Asia,Catar,Doha
+Asia,Arabia Saudi,Riad
+Asia,Singapur,Singapur
+Asia,Corea del Sur,Seul
+Asia,Sri Lanka,Sri Jayawardenepura Kotte
+Asia,Siria,Damasco
+Asia,Tayikistan,Dusanbe
+Asia,Tailandia,Bangkok
+Asia,Timor Oriental,Dili
+Asia,Turquia,Ankara
+Asia,Turkmenistan,Asjabad
+Asia,Emiratos Arabes Unidos,Abu Dabi
+Asia,Uzbekistan,Tashkent
+Asia,Vietnam,Hanoi
+Asia,Yemen,Sana
+Europa,Albania,Tirana
+Europa,Andorra,Andorra la Vieja
+Europa,Austria,Viena
+Europa,Bielorrusia,Minsk
+Europa,Belgica,Bruselas
+Europa,Bosnia y Herzegovina,Sarajevo
+Europa,Bulgaria,Sofia
+Europa,Croacia,Zagreb
+Europa,Chequia,Praga
+Europa,Dinamarca,Copenhague
+Europa,Estonia,Tallin
+Europa,Finlandia,Helsinki
+Europa,Francia,Paris
+Europa,Alemania,Berlin
+Europa,Grecia,Atenas
+Europa,Santa Sede,Ciudad del Vaticano
+Europa,Hungria,Budapest
+Europa,Islandia,Reikiavik
+Europa,Irlanda,Dublin
+Europa,Italia,Roma
+Europa,Letonia,Riga
+Europa,Liechtenstein,Vaduz
+Europa,Lituania,Vilna
+Europa,Luxemburgo,Luxemburgo
+Europa,Malta,La Valeta
+Europa,Moldavia,Chisinau
+Europa,Monaco,Monaco
+Europa,Montenegro,Podgorica
+Europa,Paises Bajos,Amsterdam
+Europa,Macedonia del Norte,Skopie
+Europa,Noruega,Oslo
+Europa,Polonia,Varsovia
+Europa,Portugal,Lisboa
+Europa,Rumania,Bucarest
+Europa,Rusia,Moscu
+Europa,San Marino,San Marino
+Europa,Serbia,Belgrado
+Europa,Eslovaquia,Bratislava
+Europa,Eslovenia,Ljubljana
+Europa,España,Madrid
+Europa,Suecia,Estocolmo
+Europa,Suiza,Berna
+Europa,Ucrania,Kiev
+Europa,Reino Unido,Londres
+Oceania,Australia,Canberra
+Oceania,Fiyi,Suva
+Oceania,Kiribati,South Tarawa
+Oceania,Islas Marshall,Majuro
+Oceania,Micronesia,Palikir
+Oceania,Nauru,Yaren
+Oceania,Nueva Zelanda,Wellington
+Oceania,Palaos,Ngerulmud
+Oceania,Papua Nueva Guinea,Port Moresby
+Oceania,Samoa,Apia
+Oceania,Islas Salomon,Honiara
+Oceania,Tonga,Nukualofa
+Oceania,Tuvalu,Funafuti
+Oceania,Vanuatu,Port Vila

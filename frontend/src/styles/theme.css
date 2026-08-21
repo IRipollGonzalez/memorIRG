@@ -1,0 +1,66 @@
+/* Design tokens for MemorIRG — a warm, paper-and-ink study palette (index
+   cards, not a generic app gray), with one terracotta accent used only for
+   primary actions and active state. */
+
+:root {
+  /* Surfaces */
+  --bg: #f5f0e6;
+  --surface: #fffcf6;
+  --border: rgb(58 48 36 / 14%);
+
+  /* Text */
+  --text: #2b2318;
+  --text-muted: #7a6f5d;
+
+  /* Accent — one color, used sparingly (primary actions, active nav, focus rings) */
+  --accent: #b1502c;
+  --accent-foreground: #fff8f2;
+
+  /* Semantic — separate from the accent, not the accent reused */
+  --positive: #3f7d52;
+  --negative: #b23b3b;
+  --info: #3b6ea5;
+
+  /* Type */
+  --font-display: "Source Serif 4", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1712;
+    --surface: #26201a;
+    --border: rgb(255 247 235 / 12%);
+    --text: #f0e9dc;
+    --text-muted: #a89a84;
+    --accent: #e0895a;
+    --accent-foreground: #241207;
+    --positive: #6fbf86;
+    --negative: #e2726b;
+    --info: #7fb3e0;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #1c1712;
+  --surface: #26201a;
+  --border: rgb(255 247 235 / 12%);
+  --text: #f0e9dc;
+  --text-muted: #a89a84;
+  --accent: #e0895a;
+  --accent-foreground: #241207;
+  --positive: #6fbf86;
+  --negative: #e2726b;
+  --info: #7fb3e0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}

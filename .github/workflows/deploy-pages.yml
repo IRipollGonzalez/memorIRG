@@ -1,0 +1,68 @@
+name: Deploy to GitHub Pages
+
+# The static build has no backend — scripts/build_topics_json.py bakes
+# data/*.csv into frontend/src/data/topics.json at build time (reusing the
+# real backend's CSV parsing), and the frontend runs entirely client-side
+# in "static" mode (see frontend/src/lib/env.ts). Any push to data/ or
+# frontend/ rebuilds and republishes automatically.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/**"
+      - "frontend/**"
+      - "backend/**"
+      - "scripts/build_topics_json.py"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend (for topics.json generation only)
+        run: pip install -e .
+
+      - name: Generate frontend/src/data/topics.json from data/*.csv
+        run: python scripts/build_topics_json.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Build static site
+        run: npm run build:static --prefix frontend
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

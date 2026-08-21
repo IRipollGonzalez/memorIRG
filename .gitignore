@@ -1,0 +1,16 @@
+.venv/
+.venv-desktop/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+node_modules/
+frontend/dist/
+frontend/src/data/topics.json
+
+build/
+dist/
+
+.env
+.DS_Store

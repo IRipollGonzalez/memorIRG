@@ -1,0 +1,105 @@
+# -*- mode: python ; coding: utf-8 -*-
+# {{APP_NAME}}.spec — PyInstaller build spec
+#
+# Build from project root with .venv-desktop active, after `npm --prefix frontend run build`:
+#   source .venv-desktop/bin/activate
+#   ./build_desktop.sh   (runs the frontend build, then: pyinstaller desktop/{{APP_NAME}}.spec --clean)
+#
+# Output: dist/{{APP_NAME}}.app
+# Entry point: desktop/launcher.py (single process — see desktop-packaging.md)
+# User data: ~/Library/Application Support/{{APP_NAME}}/data/
+# Logs:      ~/Library/Application Support/{{APP_NAME}}/logs/
+#
+# hidden_imports below is a starting skeleton — you MUST add every
+# project-specific module under backend.* by hand once the module list is
+# known. PyInstaller can't discover dynamic imports on its own, and a
+# missing entry here means a runtime ImportError in the frozen build with
+# no dev-mode symptom to warn you.
+
+from PyInstaller.utils.hooks import collect_submodules, copy_metadata
+
+block_cipher = None
+
+package_metadata = [
+    *copy_metadata("fastapi"),
+    *copy_metadata("uvicorn"),
+    *copy_metadata("pydantic"),
+    *copy_metadata("python-dotenv"),
+]
+
+datas = [
+    *package_metadata,
+    ("../backend", "backend"),
+    ("../frontend/dist", "frontend/dist"),
+]
+
+hidden_imports = [
+    *collect_submodules("uvicorn"),
+    "fastapi", "starlette", "pydantic", "pydantic_core",
+    "dotenv",
+    # "multipart", "python_multipart",  # uncomment if any route uses File/Form/UploadFile
+    "webview", "webview.platforms", "webview.platforms.cocoa",
+    "webview.http", "webview.event", "webview.window",
+    "webview.dom", "webview.menu", "webview.screen",
+    "desktop", "desktop.launcher", "desktop.paths",
+    "desktop.logging_setup", "desktop.backend_runner", "desktop.app_window",
+    # "backend", "backend.main", "backend.config", "backend.domain", ... — fill in the rest
+]
+
+a = Analysis(
+    ["launcher.py"],
+    pathex=[".."],
+    binaries=[],
+    datas=datas,
+    hiddenimports=hidden_imports,
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=["pytest", "_pytest"],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz, a.scripts, [],
+    exclude_binaries=True,
+    name="{{APP_NAME}}",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=False,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon="../assets/icon.icns",
+)
+
+coll = COLLECT(
+    exe, a.binaries, a.zipfiles, a.datas,
+    strip=False, upx=False, upx_exclude=[],
+    name="{{APP_NAME}}",
+)
+
+app = BUNDLE(
+    coll,
+    name="{{APP_NAME}}.app",
+    icon="../assets/icon.icns",
+    bundle_identifier="com.{{APP_NAME_LOWER}}.app",
+    info_plist={
+        "CFBundleName": "{{APP_NAME}}",
+        "CFBundleDisplayName": "{{APP_NAME}}",
+        "CFBundleShortVersionString": "1.0.0",
+        "CFBundleVersion": "1",
+        "NSHighResolutionCapable": True,
+        "LSMinimumSystemVersion": "12.0",
+        "NSAppTransportSecurity": {"NSAllowsLocalNetworking": True},
+        "LSUIElement": False,
+    },
+)
