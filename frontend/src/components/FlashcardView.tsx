@@ -1,7 +1,40 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { mediaKindForLabel, mediaUrl, prettyLabel, youtubeEmbedUrl } from "@/lib/media";
 import type { SessionState } from "@/types/session";
+
+function CardValue({ label, value }: { label: string; value: string }) {
+  switch (mediaKindForLabel(label)) {
+    case "image":
+      return (
+        <img
+          src={mediaUrl(value)}
+          alt={prettyLabel(label)}
+          className="max-h-40 w-auto max-w-full rounded-md object-contain sm:max-h-56"
+        />
+      );
+    case "youtube":
+      return (
+        <iframe
+          className="aspect-video w-full max-w-sm rounded-md"
+          src={youtubeEmbedUrl(value)}
+          title={prettyLabel(label)}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      );
+    case "audio":
+      // Stop propagation so tapping the native play button doesn't also flip the card.
+      return (
+        <audio controls className="w-full max-w-xs" src={mediaUrl(value)} onClick={(e) => e.stopPropagation()}>
+          Your browser can't play this audio.
+        </audio>
+      );
+    default:
+      return <span className="font-serif text-2xl font-medium text-foreground sm:text-3xl">{value}</span>;
+  }
+}
 
 interface FlashcardViewProps {
   session: SessionState | null;
@@ -47,14 +80,14 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: 
 
       <Card
         className={cn(
-          "flex h-56 w-full max-w-xl cursor-pointer flex-col items-center justify-center gap-3 px-6 text-center transition-colors duration-200 hover:scale-[1.01] sm:h-72 sm:px-8",
+          "flex min-h-56 w-full max-w-xl cursor-pointer flex-col items-center justify-center gap-3 px-6 py-6 text-center transition-colors duration-200 hover:scale-[1.01] sm:min-h-72 sm:px-8 sm:py-8",
           session.is_flipped ? "bg-card-back" : "bg-card-front",
         )}
         onClick={onFlip}
         data-testid="flashcard"
       >
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{shownLabel}</span>
-        <span className="font-serif text-2xl font-medium text-foreground sm:text-3xl">{shownValue}</span>
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{prettyLabel(shownLabel)}</span>
+        <CardValue label={shownLabel} value={shownValue} />
         <span className="text-xs text-muted-foreground">Tap to flip</span>
       </Card>
 

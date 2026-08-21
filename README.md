@@ -37,6 +37,8 @@ Open the URL Vite prints (typically http://localhost:5173).
 
 Either way: the filename becomes the topic name (`world_capitals.csv` → "World Capitals"). Columns named `category`/`subcategory` (case-insensitive) become filters; every other column becomes a possible card side. A topic needs at least 2 non-metadata columns.
 
+A column named `*_image`, `*_youtube`, or `*_audio` renders as a picture, an embedded YouTube player, or an audio clip instead of plain text — see [CLAUDE.md](CLAUDE.md#image--youtube--audio-card-sides) for the exact convention. Note the repo is public, so anything dropped in `frontend/public/media/` gets published — link out (e.g. to YouTube) rather than hosting recordings/images you don't hold the rights to.
+
 ## Tests
 
 ```bash
