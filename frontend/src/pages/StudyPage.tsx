@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { X } from "lucide-react";
 
 import { useTopic, useTopics } from "@/api/topics";
 import { useCreateSession, useFlipCard, useNextCard, usePreviousCard } from "@/api/sessions";
@@ -150,7 +150,7 @@ export function StudyPage() {
           onOpenDeck) opens the deck picker, which now takes over the full
           screen like a pushed page rather than a narrow side drawer. Once a
           session is active, tapping the header no longer opens the picker —
-          a back arrow takes its place to close the session instead. */}
+          a close (X) button takes its place to exit the session instead. */}
       <header
         className="relative flex shrink-0 items-center justify-center border-b border-border px-4 py-4 md:hidden"
         onClick={session ? undefined : () => setSheetOpen(true)}
@@ -159,14 +159,14 @@ export function StudyPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-2 size-11"
+            className="absolute right-2 size-11"
             onClick={(event) => {
               event.stopPropagation();
               handleExitSession();
             }}
             aria-label="Close session and return to the menu"
           >
-            <ArrowLeft className="size-5" />
+            <X className="size-5" />
           </Button>
         )}
         <Logo />
