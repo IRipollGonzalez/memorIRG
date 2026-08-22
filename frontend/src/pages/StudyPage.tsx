@@ -185,7 +185,7 @@ export function StudyPage() {
       </Sheet>
 
       {/* Desktop/tablet-landscape: fixed left column. */}
-      <aside className="hidden w-72 shrink-0 flex-col gap-6 border-r border-border bg-surface/40 px-5 py-6 md:flex">
+      <aside className="hidden w-72 shrink-0 flex-col gap-6 overflow-y-auto border-r border-border bg-surface/40 px-5 py-6 md:flex">
         <Logo />
         <Sidebar {...sidebarProps} />
       </aside>

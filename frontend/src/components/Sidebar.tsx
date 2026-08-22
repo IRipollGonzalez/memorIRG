@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { hasCategories as computeHasCategories, uniqueCategories, uniqueSubcategories } from "@/lib/topicFilters";
+import { IS_STATIC } from "@/lib/env";
+
+const REPO_URL = "https://github.com/IRipollGonzalez/memorIRG";
 
 const ALL_VALUE = "__all__";
 
@@ -155,6 +158,8 @@ export function Sidebar({
         )}
       </div>
 
+      {IS_STATIC && <AddCardsHelp />}
+
       {noMatches && (
         <p className="rounded-md bg-negative/10 px-3 py-2 text-sm text-negative">
           No cards match the current filters.
@@ -179,5 +184,41 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="text-sm font-medium text-muted-foreground md:text-xs">{label}</span>
       {children}
     </label>
+  );
+}
+
+function Code({ children }: { children: React.ReactNode }) {
+  return <code className="rounded bg-muted px-1 py-0.5 text-xs text-foreground">{children}</code>;
+}
+
+/** Only shown on the static (GitHub Pages) build — the desktop/dev app's
+ * equivalent instructions are "drop a CSV in data/ and reload", which
+ * doesn't involve GitHub at all. */
+function AddCardsHelp() {
+  return (
+    <div className="rounded-lg border border-border bg-secondary/40 px-4 py-3 text-sm text-muted-foreground">
+      <p className="mb-2.5 leading-relaxed">
+        <span className="font-medium text-foreground">Want to add a new topic?</span> Go to{" "}
+        <a
+          href={REPO_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-2 hover:text-foreground"
+        >
+          github.com/IRipollGonzalez/memorIRG
+        </a>
+        , open the <Code>data</Code> folder, and add a new <Code>.csv</Code> file there. The first row is the
+        column names — <Code>category</Code> and <Code>subcategory</Code> are optional filters, and every other
+        column becomes a side you can pick above (you can have more than two). For example:
+      </p>
+      <pre className="mb-2.5 overflow-x-auto rounded-md bg-muted px-3 py-2 font-mono text-xs text-foreground">
+        {"category,english,spanish,italian\nanimals,dog,perro,cane"}
+      </pre>
+      <p className="leading-relaxed">
+        <span className="font-medium text-foreground">Want to add cards to an existing topic?</span> Open that
+        topic's <Code>.csv</Code> file in the same folder, add a new line with a value for each column, and
+        commit. The site rebuilds and updates automatically within a minute or two.
+      </p>
+    </div>
   );
 }
