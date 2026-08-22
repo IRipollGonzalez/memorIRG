@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CardsMark } from "@/components/CardsMark";
 import { cn } from "@/lib/utils";
 import { mediaKindForLabel, mediaUrl, prettyLabel, youtubeEmbedUrl } from "@/lib/media";
 import type { SessionState } from "@/types/session";
@@ -32,7 +33,7 @@ function CardValue({ label, value }: { label: string; value: string }) {
         </audio>
       );
     default:
-      return <span className="font-serif text-2xl font-medium text-foreground sm:text-3xl">{value}</span>;
+      return <span className="font-serif text-3xl font-medium text-foreground sm:text-3xl">{value}</span>;
   }
 }
 
@@ -47,9 +48,10 @@ interface FlashcardViewProps {
 export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: FlashcardViewProps) {
   if (!session) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
-        <p className="font-serif text-lg text-foreground sm:text-xl">Pick a topic and press Start Session</p>
-        <p className="text-sm text-muted-foreground">Your shuffled deck will appear here.</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+        <CardsMark className="mb-1 h-36 w-36 sm:h-40 sm:w-40" />
+        <p className="font-serif text-2xl font-medium text-foreground sm:text-xl">Pick a topic and press Start Session</p>
+        <p className="text-base text-muted-foreground sm:text-sm">Your shuffled deck will appear here.</p>
       </div>
     );
   }
@@ -57,11 +59,11 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: 
   if (session.completed) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="font-serif text-xl font-semibold text-foreground sm:text-2xl">Session complete!</p>
-        <p className="text-sm text-muted-foreground">
+        <p className="font-serif text-2xl font-semibold text-foreground sm:text-2xl">Session complete!</p>
+        <p className="text-base text-muted-foreground sm:text-sm">
           You went through all {session.total_cards} cards in {session.topic_label}.
         </p>
-        <Button variant="outline" size="lg" onClick={onPrevious} disabled={pending}>
+        <Button variant="outline" size="lg" className="h-12 text-base md:h-9 md:text-sm" onClick={onPrevious} disabled={pending}>
           Previous
         </Button>
       </div>
@@ -74,13 +76,13 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: 
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-6 sm:gap-6 sm:px-6">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-base text-muted-foreground sm:text-sm">
         Card {session.current_index + 1} of {session.total_cards}
       </p>
 
       <Card
         className={cn(
-          "flex min-h-56 w-full max-w-xl cursor-pointer flex-col items-center justify-center gap-3 px-6 py-6 text-center transition-colors duration-200 hover:scale-[1.01] sm:min-h-72 sm:px-8 sm:py-8",
+          "flex min-h-64 w-full max-w-xl cursor-pointer flex-col items-center justify-center gap-3 px-6 py-6 text-center transition-colors duration-200 hover:scale-[1.01] sm:min-h-72 sm:px-8 sm:py-8",
           session.is_flipped ? "bg-card-back" : "bg-card-front",
         )}
         onClick={onFlip}
@@ -91,16 +93,17 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: 
         <span className="text-xs text-muted-foreground">Tap to flip</span>
       </Card>
 
-      <div className="grid w-full max-w-xl grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
+      <div className="grid w-full max-w-xl grid-cols-2 gap-3 sm:flex sm:w-auto sm:items-center">
         <Button
           variant="outline"
           size="lg"
+          className="h-12 text-base md:h-9 md:text-sm"
           onClick={onPrevious}
           disabled={!session.can_go_previous || pending}
         >
           Previous
         </Button>
-        <Button size="lg" onClick={onNext} disabled={!session.can_go_next || pending}>
+        <Button size="lg" className="h-12 text-base md:h-9 md:text-sm" onClick={onNext} disabled={!session.can_go_next || pending}>
           Next
         </Button>
       </div>

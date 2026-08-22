@@ -1,22 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 
 import { useTopic, useTopics } from "@/api/topics";
 import { useCreateSession, useFlipCard, useNextCard, usePreviousCard } from "@/api/sessions";
 import { Sidebar } from "@/components/Sidebar";
 import { FlashcardView } from "@/components/FlashcardView";
+import { RecentSessionsDock } from "@/components/RecentSessionsDock";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { matchingPairCount, resolveOtherSide } from "@/lib/topicFilters";
+import { loadRecentSessions, saveRecentSession } from "@/lib/recentSessions";
+import type { RecentSession } from "@/lib/recentSessions";
 import type { SessionState } from "@/types/session";
 
 function Logo() {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary font-serif text-xs font-semibold text-primary-foreground md:size-8 md:text-sm">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary font-serif text-sm font-semibold text-primary-foreground md:size-8">
         M
       </div>
-      <span className="font-serif text-base font-semibold tracking-tight md:text-lg">MemorIRG</span>
+      <span className="font-serif text-lg font-semibold tracking-tight">MemorIRG</span>
     </div>
   );
 }
@@ -31,6 +34,8 @@ export function StudyPage() {
   const [side2, setSide2] = useState<string | null>(null);
   const [session, setSession] = useState<SessionState | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [recents, setRecents] = useState<RecentSession[]>(() => loadRecentSessions());
+  const pendingResumeRef = useRef<RecentSession | null>(null);
 
   const { data: topic } = useTopic(topicName);
   const createSession = useCreateSession();
@@ -45,12 +50,19 @@ export function StudyPage() {
   }, [topics, topicName]);
 
   useEffect(() => {
-    if (topic) {
-      setCategory(null);
-      setSubcategory(null);
-      setSide1(topic.content_labels[0] ?? null);
-      setSide2(topic.content_labels[1] ?? null);
+    if (!topic) return;
+
+    const pending = pendingResumeRef.current;
+    if (pending && pending.topicName === topic.name) {
+      pendingResumeRef.current = null;
+      startSession(pending);
+      return;
     }
+
+    setCategory(null);
+    setSubcategory(null);
+    setSide1(topic.content_labels[0] ?? null);
+    setSide2(topic.content_labels[1] ?? null);
   }, [topic?.name]);
 
   useEffect(() => {
@@ -69,17 +81,35 @@ export function StudyPage() {
 
   const matchingCount = matchingPairCount(topic, category, subcategory);
 
-  function handleStart() {
-    if (!topicName || !side1 || !side2) return;
+  function startSession(config: Omit<RecentSession, "startedAt">) {
     createSession.mutate(
-      { topic: topicName, category, subcategory, side_1: side1, side_2: side2 },
+      { topic: config.topicName, category: config.category, subcategory: config.subcategory, side_1: config.side1, side_2: config.side2 },
       {
         onSuccess: (next) => {
           setSession(next);
           setSheetOpen(false);
+          setRecents(saveRecentSession({ ...config, startedAt: new Date().toISOString() }));
         },
       },
     );
+  }
+
+  function handleStart() {
+    if (!topicName || !side1 || !side2 || !topic) return;
+    startSession({ topicName, topicLabel: topic.label, category, subcategory, side1, side2 });
+  }
+
+  function handleResumeRecent(recent: RecentSession) {
+    if (topic && topic.name === recent.topicName) {
+      setCategory(recent.category);
+      setSubcategory(recent.subcategory);
+      setSide1(recent.side1);
+      setSide2(recent.side2);
+      startSession(recent);
+    } else {
+      pendingResumeRef.current = recent;
+      setTopicName(recent.topicName);
+    }
   }
 
   const sidebarProps = {
@@ -103,10 +133,10 @@ export function StudyPage() {
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground md:flex-row">
       {/* Mobile/tablet: sidebar content lives in a slide-out sheet, triggered from a slim top bar. */}
-      <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3 md:hidden">
+      <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-4 md:hidden">
         <Logo />
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger render={<Button variant="outline" size="sm" />}>
+          <SheetTrigger render={<Button variant="outline" size="lg" className="h-11 text-base" />}>
             <SlidersHorizontal className="size-4" />
             Deck
           </SheetTrigger>
@@ -134,6 +164,7 @@ export function StudyPage() {
           onPrevious={() => session && previousCard.mutate(session.session_id, { onSuccess: setSession })}
           pending={flipCard.isPending || nextCard.isPending || previousCard.isPending}
         />
+        {!session && <RecentSessionsDock recents={recents} onResume={handleResumeRecent} />}
       </main>
     </div>
   );

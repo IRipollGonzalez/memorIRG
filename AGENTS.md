@@ -59,9 +59,12 @@ frontend/
     pages/StudyPage.tsx        # the single screen: sidebar + flashcard view
     components/Sidebar.tsx     # topic/category/subcategory/side selection, Start button
     components/FlashcardView.tsx
+    components/CardsMark.tsx    # decorative two-card mark shown on the empty/landing state
+    components/RecentSessionsDock.tsx  # bottom dock of recently-studied deck configs, tap to resume
     components/ui/             # shadcn/ui primitives (Base UI), copied in and restyled
     api/                        # topics.ts, sessions.ts — TanStack Query hooks
     lib/topicFilters.ts         # pure helpers: side-swap-on-conflict, category/subcategory derivation
+    lib/recentSessions.ts       # localStorage-backed "recent decks" list, client-only, no server involved
     lib/env.ts                  # IS_STATIC — the only place reading import.meta.env
     lib/local/                  # topicsEngine/deckEngine/sessionEngine — TS port of backend/, static build only
     lib/media.ts                 # column-name convention for image/youtube/audio card sides
@@ -95,6 +98,8 @@ pyproject.toml
 **One uvicorn process serving both API and frontend in packaged mode** — no subprocess, no mode-dispatch env var (unlike the retired Streamlit version, which needed two OS processes because Streamlit's own event loop couldn't share a thread with pywebview). `backend/main.py` branches on whether `frontend/dist/` exists rather than an env flag, so dev and packaged mode share the identical codebase.
 
 **Side selection swap-on-conflict is a pure frontend function** — `frontend/src/lib/topicFilters.ts`'s `resolveOtherSide()` auto-swaps the other side when a user picks the same content column for both, mirroring the original app's dropdown behavior. The backend still validates `side_1 != side_2` at the API boundary (`InvalidSideSelectionError` → 400) as a defensive check, but the interactive swap itself is UI, not business logic.
+
+**Recent sessions live in localStorage, not the backend** — `frontend/src/lib/recentSessions.ts` keeps the last 6 studied deck configs (topic, category/subcategory, sides) per browser, shown as a resume dock on the empty/landing state. This is deliberately client-only and per-device: it needs no session-store schema on the backend, and matches the "closing the app loses session state" design decision already in place for the active study session — recents are a UI convenience layered on top, not persisted app state.
 
 **Media card sides (image/YouTube/audio) are a column-naming convention, not a schema change** — a content label ending in `_image`/`_youtube`/`_audio` (`frontend/src/lib/media.ts`) renders as that media type instead of text; a cell value is either a bare filename (resolved against `frontend/public/media/`, which Vite copies into every build — dev, desktop, and static) or a full `http(s)://` URL, auto-detected. Nothing in `backend/domain` changed to support this — `FlashcardRecord.values` was always `dict[str, str]`, so a filename or URL is just another string value; the rendering decision lives entirely in the frontend. Because the repo is public, treat `public/media/` as published content — prefer linking out (e.g. a YouTube URL) over checking in copyrighted recordings/images you don't hold the rights to.
 

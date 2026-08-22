@@ -55,7 +55,7 @@ export function Sidebar({
 
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5 md:gap-4">
         <Field label="Topic">
           {/* value is never `undefined` (even before topics load) — Base UI
               warns loudly if a Select flips from uncontrolled to controlled
@@ -83,7 +83,7 @@ export function Sidebar({
                 value={category ?? ALL_VALUE}
                 onValueChange={(value) => onCategoryChange(value === ALL_VALUE ? null : value)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
                   <SelectValue>{(value: string) => (value === ALL_VALUE ? "All" : value)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -103,7 +103,7 @@ export function Sidebar({
                   value={subcategory ?? ALL_VALUE}
                   onValueChange={(value) => onSubcategoryChange(value === ALL_VALUE ? null : value)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
                     <SelectValue>{(value: string) => (value === ALL_VALUE ? "All" : value)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -124,7 +124,7 @@ export function Sidebar({
           <>
             <Field label="Side 1 (shown first)">
               <Select value={side1 ?? ""} onValueChange={(value) => value && onSide1Change(value)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -139,7 +139,7 @@ export function Sidebar({
 
             <Field label="Side 2 (revealed on flip)">
               <Select value={side2 ?? ""} onValueChange={(value) => value && onSide2Change(value)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,7 +162,7 @@ export function Sidebar({
       )}
 
       <Button
-        className="mt-auto w-full"
+        className="mt-auto h-14 w-full text-lg md:h-10 md:text-base"
         size="lg"
         disabled={!topic || noMatches || starting}
         onClick={onStart}
@@ -175,8 +175,8 @@ export function Sidebar({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+    <label className="flex flex-col gap-2 md:gap-1.5">
+      <span className="text-sm font-medium text-muted-foreground md:text-xs">{label}</span>
       {children}
     </label>
   );
