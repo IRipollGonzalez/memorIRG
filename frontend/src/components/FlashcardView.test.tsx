@@ -21,7 +21,23 @@ const baseSession: SessionState = {
 describe("FlashcardView", () => {
   it("shows a prompt when there is no session", () => {
     render(<FlashcardView session={null} onFlip={vi.fn()} onNext={vi.fn()} onPrevious={vi.fn()} pending={false} />);
-    expect(screen.getByText(/pick a topic/i)).toBeInTheDocument();
+    expect(screen.getByText(/choose a topic/i)).toBeInTheDocument();
+  });
+
+  it("calls onOpenDeck when the empty landing area is tapped", () => {
+    const onOpenDeck = vi.fn();
+    render(
+      <FlashcardView
+        session={null}
+        onFlip={vi.fn()}
+        onNext={vi.fn()}
+        onPrevious={vi.fn()}
+        onOpenDeck={onOpenDeck}
+        pending={false}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("landing"));
+    expect(onOpenDeck).toHaveBeenCalled();
   });
 
   it("shows side 1 before flipping and calls onFlip when the card is clicked", () => {

@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { matchingPairCount, resolveOtherSide } from "@/lib/topicFilters";
 import { loadRecentSessions, saveRecentSession } from "@/lib/recentSessions";
+import { cn } from "@/lib/utils";
 import type { RecentSession } from "@/lib/recentSessions";
 import type { SessionState } from "@/types/session";
 
-function Logo() {
+function Logo({ className }: { className?: string }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className={cn("flex items-center gap-2.5", className)}>
       <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary font-serif text-sm font-semibold text-primary-foreground md:size-8">
         M
       </div>
@@ -99,6 +100,14 @@ export function StudyPage() {
     startSession({ topicName, topicLabel: topic.label, category, subcategory, side1, side2 });
   }
 
+  function handleOpenDeckFromLanding() {
+    // The desktop layout already shows the sidebar inline — this tap-anywhere
+    // affordance only makes sense (and only has a Sheet to open) below md.
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      setSheetOpen(true);
+    }
+  }
+
   function handleResumeRecent(recent: RecentSession) {
     if (topic && topic.name === recent.topicName) {
       setCategory(recent.category);
@@ -132,11 +141,16 @@ export function StudyPage() {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground md:flex-row">
-      {/* Mobile/tablet: sidebar content lives in a slide-out sheet, triggered from a slim top bar. */}
-      <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-4 md:hidden">
-        <Logo />
+      {/* Mobile/tablet: sidebar content lives in a slide-out sheet. The Deck
+          button is a backup affordance (useful once a session is active) —
+          the primary way in is tapping the landing area itself, wired
+          through FlashcardView's onOpenDeck below. A 3-column grid keeps the
+          wordmark truly centered regardless of the Deck button's width. */}
+      <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-border px-4 py-4 md:hidden">
+        <span />
+        <Logo className="justify-self-center" />
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger render={<Button variant="outline" size="lg" className="h-11 text-base" />}>
+          <SheetTrigger render={<Button variant="outline" size="lg" className="h-11 justify-self-end text-base" />}>
             <SlidersHorizontal className="size-4" />
             Deck
           </SheetTrigger>
@@ -162,6 +176,7 @@ export function StudyPage() {
           onFlip={() => session && flipCard.mutate(session.session_id, { onSuccess: setSession })}
           onNext={() => session && nextCard.mutate(session.session_id, { onSuccess: setSession })}
           onPrevious={() => session && previousCard.mutate(session.session_id, { onSuccess: setSession })}
+          onOpenDeck={handleOpenDeckFromLanding}
           pending={flipCard.isPending || nextCard.isPending || previousCard.isPending}
         />
         {!session && <RecentSessionsDock recents={recents} onResume={handleResumeRecent} />}

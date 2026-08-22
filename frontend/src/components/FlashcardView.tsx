@@ -42,16 +42,21 @@ interface FlashcardViewProps {
   onFlip: () => void;
   onNext: () => void;
   onPrevious: () => void;
+  onOpenDeck?: () => void;
   pending: boolean;
 }
 
-export function FlashcardView({ session, onFlip, onNext, onPrevious, pending }: FlashcardViewProps) {
+export function FlashcardView({ session, onFlip, onNext, onPrevious, onOpenDeck, pending }: FlashcardViewProps) {
   if (!session) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+      <div
+        className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center"
+        onClick={onOpenDeck}
+        data-testid="landing"
+      >
         <CardsMark className="mb-1 h-36 w-36 sm:h-40 sm:w-40" />
-        <p className="font-serif text-2xl font-medium text-foreground sm:text-xl">Pick a topic and press Start Session</p>
-        <p className="text-base text-muted-foreground sm:text-sm">Your shuffled deck will appear here.</p>
+        <p className="font-serif text-2xl font-medium text-foreground sm:text-xl">Tap to choose a topic</p>
+        <p className="text-base text-muted-foreground sm:text-sm">Then press Start Session to begin.</p>
       </div>
     );
   }
