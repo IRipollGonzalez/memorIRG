@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 import { useTopic, useTopics } from "@/api/topics";
 import { useCreateSession, useFlipCard, useNextCard, usePreviousCard } from "@/api/sessions";
 import { Sidebar } from "@/components/Sidebar";
 import { FlashcardView } from "@/components/FlashcardView";
 import { RecentSessionsDock } from "@/components/RecentSessionsDock";
+import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { matchingPairCount, resolveOtherSide } from "@/lib/topicFilters";
 import { loadRecentSessions, saveRecentSession } from "@/lib/recentSessions";
@@ -106,6 +108,10 @@ export function StudyPage() {
     }
   }
 
+  function handleExitSession() {
+    setSession(null);
+  }
+
   function handleResumeRecent(recent: RecentSession) {
     if (topic && topic.name === recent.topicName) {
       setCategory(recent.category);
@@ -142,11 +148,27 @@ export function StudyPage() {
       {/* Mobile/tablet: no dedicated "Deck" button — the header itself (and,
           on the empty landing state, the whole content area via
           onOpenDeck) opens the deck picker, which now takes over the full
-          screen like a pushed page rather than a narrow side drawer. */}
+          screen like a pushed page rather than a narrow side drawer. Once a
+          session is active, tapping the header no longer opens the picker —
+          a back arrow takes its place to close the session instead. */}
       <header
-        className="flex shrink-0 items-center justify-center border-b border-border px-4 py-4 md:hidden"
-        onClick={() => setSheetOpen(true)}
+        className="relative flex shrink-0 items-center justify-center border-b border-border px-4 py-4 md:hidden"
+        onClick={session ? undefined : () => setSheetOpen(true)}
       >
+        {session && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 size-11"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleExitSession();
+            }}
+            aria-label="Close session and return to the menu"
+          >
+            <ArrowLeft className="size-5" />
+          </Button>
+        )}
         <Logo />
       </header>
 
