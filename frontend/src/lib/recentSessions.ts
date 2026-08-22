@@ -13,7 +13,7 @@ export interface RecentSession {
 }
 
 const STORAGE_KEY = "memorirg.recent_sessions";
-const MAX_ENTRIES = 6;
+const MAX_ENTRIES = 10;
 
 function readAll(): RecentSession[] {
   try {

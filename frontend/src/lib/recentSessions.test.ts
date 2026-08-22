@@ -36,14 +36,15 @@ describe("saveRecentSession", () => {
     expect(recents[0].topicName).toBe("languages");
   });
 
-  it("caps the list at 6 entries, dropping the oldest", () => {
-    for (let i = 0; i < 8; i++) {
+  it("caps the list at 10 entries, dropping the oldest", () => {
+    for (let i = 0; i < 12; i++) {
       saveRecentSession(entry({ topicName: `topic-${i}` }));
     }
     const recents = loadRecentSessions();
-    expect(recents).toHaveLength(6);
-    expect(recents[0].topicName).toBe("topic-7");
+    expect(recents).toHaveLength(10);
+    expect(recents[0].topicName).toBe("topic-11");
     expect(recents.some((r) => r.topicName === "topic-0")).toBe(false);
+    expect(recents.some((r) => r.topicName === "topic-1")).toBe(false);
   });
 });
 
