@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { SlidersHorizontal } from "lucide-react";
 
 import { useTopic, useTopics } from "@/api/topics";
 import { useCreateSession, useFlipCard, useNextCard, usePreviousCard } from "@/api/sessions";
 import { Sidebar } from "@/components/Sidebar";
 import { FlashcardView } from "@/components/FlashcardView";
 import { RecentSessionsDock } from "@/components/RecentSessionsDock";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { matchingPairCount, resolveOtherSide } from "@/lib/topicFilters";
 import { loadRecentSessions, saveRecentSession } from "@/lib/recentSessions";
 import { cn } from "@/lib/utils";
@@ -141,28 +139,28 @@ export function StudyPage() {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-background text-foreground md:flex-row">
-      {/* Mobile/tablet: sidebar content lives in a slide-out sheet. The Deck
-          button is a backup affordance (useful once a session is active) —
-          the primary way in is tapping the landing area itself, wired
-          through FlashcardView's onOpenDeck below. A 3-column grid keeps the
-          wordmark truly centered regardless of the Deck button's width. */}
-      <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-border px-4 py-4 md:hidden">
-        <span />
-        <Logo className="justify-self-center" />
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger render={<Button variant="outline" size="lg" className="h-11 justify-self-end text-base" />}>
-            <SlidersHorizontal className="size-4" />
-            Deck
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[86vw] max-w-sm gap-0 p-5">
-            <SheetHeader className="p-0 pb-5">
-              <SheetTitle>Study deck</SheetTitle>
-              <SheetDescription>Choose a topic and how to study it.</SheetDescription>
-            </SheetHeader>
-            <Sidebar {...sidebarProps} />
-          </SheetContent>
-        </Sheet>
+      {/* Mobile/tablet: no dedicated "Deck" button — the header itself (and,
+          on the empty landing state, the whole content area via
+          onOpenDeck) opens the deck picker, which now takes over the full
+          screen like a pushed page rather than a narrow side drawer. */}
+      <header
+        className="flex shrink-0 items-center justify-center border-b border-border px-4 py-4 md:hidden"
+        onClick={() => setSheetOpen(true)}
+      >
+        <Logo />
       </header>
+
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="full" className="gap-0 p-0 md:hidden">
+          <SheetHeader className="border-b border-border p-5 pb-4">
+            <SheetTitle className="font-serif text-2xl">Choose your deck</SheetTitle>
+            <SheetDescription className="text-base">Pick a topic and how you'd like to study it.</SheetDescription>
+          </SheetHeader>
+          <div className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-y-auto px-5 py-6">
+            <Sidebar {...sidebarProps} />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Desktop/tablet-landscape: fixed left column. */}
       <aside className="hidden w-72 shrink-0 flex-col gap-6 border-r border-border bg-surface/40 px-5 py-6 md:flex">
