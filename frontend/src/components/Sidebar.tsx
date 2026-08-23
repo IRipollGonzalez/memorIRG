@@ -203,7 +203,7 @@ function AddCardsHelp() {
           href={REPO_URL}
           target="_blank"
           rel="noreferrer"
-          className="underline underline-offset-2 hover:text-foreground"
+          className="text-accent underline underline-offset-2 hover:text-accent-hover"
         >
           github.com/IRipollGonzalez/memorIRG
         </a>

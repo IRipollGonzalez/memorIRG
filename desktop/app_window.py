@@ -27,9 +27,9 @@ _LOADING_HTML = """\
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-:root { --bg: #f5f0e6; --fg: #2b2318; --muted: #7a6f5d; --accent: #b1502c; --accent-fg: #fff8f2; }
+:root { --bg: #f6f1e6; --fg: #241d13; --muted: #6d6152; --accent: #8a3324; --accent-fg: #fdf6ee; }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #1c1712; --fg: #f0e9dc; --muted: #a89a84; --accent: #e0895a; --accent-fg: #241207; }
+  :root { --bg: #17130d; --fg: #ece4d4; --muted: #a89a83; --accent: #d1875a; --accent-fg: #1c1108; }
 }
 body { background: var(--bg); color: var(--fg);
        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
@@ -52,9 +52,9 @@ _ERROR_HTML = """\
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-:root { --bg: #f5f0e6; --fg: #2b2318; --muted: #7a6f5d; --accent: #b1502c; --accent-fg: #fff8f2; }
+:root { --bg: #f6f1e6; --fg: #241d13; --muted: #6d6152; --accent: #8a3324; --accent-fg: #fdf6ee; }
 @media (prefers-color-scheme: dark) {
-  :root { --bg: #1c1712; --fg: #f0e9dc; --muted: #a89a84; --accent: #e0895a; --accent-fg: #241207; }
+  :root { --bg: #17130d; --fg: #ece4d4; --muted: #a89a83; --accent: #d1875a; --accent-fg: #1c1108; }
 }
 body { background: var(--bg); color: var(--fg);
        font-family: -apple-system, BlinkMacSystemFont, sans-serif;

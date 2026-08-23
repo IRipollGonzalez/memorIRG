@@ -1,71 +1,84 @@
-/* Design tokens for MemorIRG — a warm, paper-and-ink study palette (index
-   cards, not a generic app gray), with one terracotta accent used only for
-   primary actions and active state. */
+/* Design tokens for MemorIRG — warm parchment neutrals (not stock gray),
+   with one oxblood/terracotta accent used sparingly for primary actions,
+   active state, links, and focus rings. Shared with the sibling projects'
+   token set rather than invented fresh for this app. */
 
 :root {
   /* Surfaces */
-  --bg: #f5f0e6;
-  --surface: #fffcf6;
-  --border: rgb(58 48 36 / 14%);
-
-  /* Flashcard sides — distinct backgrounds so flipping reads as a real
-     state change, not just a text swap. Front matches --surface. */
-  --card-front: #fffcf6;
-  --card-back: #f4e3d2;
+  --bg: #f6f1e6;
+  --surface: #fffcf5;
+  --surface-raised: #ffffff;
+  --border: rgb(56 42 22 / 14%);
 
   /* Text */
-  --text: #2b2318;
-  --text-muted: #7a6f5d;
+  --text: #241d13;
+  --text-muted: #6d6152;
 
-  /* Accent — one color, used sparingly (primary actions, active nav, focus rings) */
-  --accent: #b1502c;
-  --accent-foreground: #fff8f2;
+  /* Accent — one color, used sparingly (primary actions, active nav, links, focus rings) */
+  --accent: #8a3324;
+  --accent-hover: #74291d;
+  --accent-foreground: #fdf6ee;
 
   /* Semantic — separate from the accent, not the accent reused */
-  --positive: #3f7d52;
-  --negative: #b23b3b;
-  --info: #3b6ea5;
+  --positive: #3f7a4f;
+  --negative: #b2402a;
+  --info: #3d6b8a;
+  --warning: #a3711f;
+
+  /* Flashcard sides — distinct backgrounds so flipping reads as a real
+     state change, not just a text swap. Both derive from tokens above, so
+     they automatically stay correct across light/dark without repeating
+     literal colors in the mode blocks below. */
+  --card-front: var(--surface);
+  --card-back: color-mix(in srgb, var(--accent) 14%, var(--surface));
 
   /* Type */
-  --font-display: "Source Serif 4", Georgia, serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Source Sans 3", -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Radius */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
+
+  /* Elevation */
+  --shadow-elevated: 0 12px 32px -12px rgb(36 29 19 / 28%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1c1712;
-    --surface: #26201a;
-    --border: rgb(255 247 235 / 12%);
-    --card-front: #26201a;
-    --card-back: #3a2c1d;
-    --text: #f0e9dc;
-    --text-muted: #a89a84;
-    --accent: #e0895a;
-    --accent-foreground: #241207;
-    --positive: #6fbf86;
-    --negative: #e2726b;
-    --info: #7fb3e0;
+    --bg: #17130d;
+    --surface: #201a12;
+    --surface-raised: #262019;
+    --border: rgb(240 227 204 / 12%);
+    --text: #ece4d4;
+    --text-muted: #a89a83;
+    --accent: #d1875a;
+    --accent-hover: #dd9a70;
+    --accent-foreground: #1c1108;
+    --positive: #74b481;
+    --negative: #dd8468;
+    --info: #7fb0cf;
+    --warning: #d3a24f;
+    --shadow-elevated: 0 12px 32px -12px rgb(0 0 0 / 50%);
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #1c1712;
-  --surface: #26201a;
-  --border: rgb(255 247 235 / 12%);
-  --card-front: #26201a;
-  --card-back: #3a2c1d;
-  --text: #f0e9dc;
-  --text-muted: #a89a84;
-  --accent: #e0895a;
-  --accent-foreground: #241207;
-  --positive: #6fbf86;
-  --negative: #e2726b;
-  --info: #7fb3e0;
+  --bg: #17130d;
+  --surface: #201a12;
+  --surface-raised: #262019;
+  --border: rgb(240 227 204 / 12%);
+  --text: #ece4d4;
+  --text-muted: #a89a83;
+  --accent: #d1875a;
+  --accent-hover: #dd9a70;
+  --accent-foreground: #1c1108;
+  --positive: #74b481;
+  --negative: #dd8468;
+  --info: #7fb0cf;
+  --warning: #d3a24f;
+  --shadow-elevated: 0 12px 32px -12px rgb(0 0 0 / 50%);
 }
 
 /* The document itself never scrolls — only the app's own flex/overflow-y-auto

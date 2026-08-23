@@ -25,11 +25,11 @@
   --color-popover-foreground: var(--text);
   --color-primary: var(--accent);
   --color-primary-foreground: var(--accent-foreground);
-  --color-secondary: var(--surface-alt);
+  --color-secondary: var(--surface-raised);
   --color-secondary-foreground: var(--text);
-  --color-muted: var(--surface-alt);
+  --color-muted: var(--surface-raised);
   --color-muted-foreground: var(--text-muted);
-  --color-accent: var(--surface-alt);
+  --color-accent: var(--surface-raised);
   --color-accent-foreground: var(--text);
   --color-destructive: var(--negative);
   --color-border: var(--border);
@@ -39,15 +39,15 @@
   /* Direct access to this project's own tokens, for the odd spot a
      shadcn semantic name (card/muted/etc.) doesn't fit. */
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-info: var(--info);
+  --color-warning: var(--warning);
   --color-card-front: var(--card-front);
   --color-card-back: var(--card-back);
-}
-
-:root {
-  --surface-alt: color-mix(in srgb, var(--surface), var(--text) 6%);
+  --color-accent-hover: var(--accent-hover);
+  --shadow-elevated: var(--shadow-elevated);
 }
 
 @layer base {
