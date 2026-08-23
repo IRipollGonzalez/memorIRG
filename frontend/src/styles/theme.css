@@ -68,6 +68,19 @@
   --info: #7fb3e0;
 }
 
+/* The document itself never scrolls — only the app's own flex/overflow-y-auto
+   regions (main, the deck page, the recent-sessions list) do. Without this,
+   the desktop app's WKWebView rubber-bands the whole page on an
+   already-fixed-position header, which looks like the header briefly
+   scrolling away even though it never actually moved in the layout. */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
