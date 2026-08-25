@@ -9,7 +9,7 @@ import { RecentSessionsDock } from "@/components/RecentSessionsDock";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { matchingPairCount, resolveOtherSide } from "@/lib/topicFilters";
-import { loadRecentSessions, saveRecentSession } from "@/lib/recentSessions";
+import { loadRecentSessions, removeRecentSession, saveRecentSession } from "@/lib/recentSessions";
 import { cn } from "@/lib/utils";
 import type { RecentSession } from "@/lib/recentSessions";
 import type { SessionState } from "@/types/session";
@@ -32,6 +32,10 @@ export function StudyPage() {
   const [side2, setSide2] = useState<string | null>(null);
   const [session, setSession] = useState<SessionState | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  // Forces the mobile deck picker's Sidebar to remount (fresh internal wizard
+  // step) every time it opens, rather than resuming wherever it was left —
+  // the underlying topic/category/subcategory values aren't touched by this.
+  const [wizardResetKey, setWizardResetKey] = useState(0);
   const [recents, setRecents] = useState<RecentSession[]>(() => loadRecentSessions());
   const pendingResumeRef = useRef<RecentSession | null>(null);
 
@@ -109,6 +113,10 @@ export function StudyPage() {
     setSession(null);
   }
 
+  function handleRemoveRecent(recent: RecentSession) {
+    setRecents(removeRecentSession(recent));
+  }
+
   function handleResumeRecent(recent: RecentSession) {
     if (topic && topic.name === recent.topicName) {
       setCategory(recent.category);
@@ -169,13 +177,19 @@ export function StudyPage() {
         <Logo />
       </header>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <Sheet
+        open={sheetOpen}
+        onOpenChange={(open) => {
+          setSheetOpen(open);
+          if (open) setWizardResetKey((key) => key + 1);
+        }}
+      >
         <SheetContent side="full" className="gap-0 p-0 md:hidden">
           <SheetHeader className="border-b border-border p-5 pb-4">
             <SheetTitle className="font-serif text-2xl">Choose your deck</SheetTitle>
           </SheetHeader>
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-y-auto px-5 py-6">
-            <Sidebar {...sidebarProps} />
+            <Sidebar key={wizardResetKey} {...sidebarProps} />
           </div>
         </SheetContent>
       </Sheet>
@@ -195,7 +209,9 @@ export function StudyPage() {
           onOpenDeck={handleOpenDeckFromLanding}
           pending={flipCard.isPending || nextCard.isPending || previousCard.isPending}
         />
-        {!session && <RecentSessionsDock recents={recents} onResume={handleResumeRecent} />}
+        {!session && (
+          <RecentSessionsDock recents={recents} onResume={handleResumeRecent} onRemove={handleRemoveRecent} />
+        )}
       </main>
     </div>
   );

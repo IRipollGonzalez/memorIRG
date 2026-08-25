@@ -51,6 +51,17 @@ export function saveRecentSession(entry: RecentSession): RecentSession[] {
   return next;
 }
 
+/** Removes one entry (e.g. swiped away) and persists the result. */
+export function removeRecentSession(entry: RecentSession): RecentSession[] {
+  const next = readAll().filter((r) => !sameConfig(r, entry));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Private browsing / quota exceeded — nothing to persist either way.
+  }
+  return next;
+}
+
 export function formatRelativeTime(iso: string, now: Date = new Date()): string {
   const minutes = Math.round((now.getTime() - new Date(iso).getTime()) / 60_000);
   if (minutes < 1) return "just now";

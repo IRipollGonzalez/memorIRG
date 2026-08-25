@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown, Info } from "lucide-react";
 
 import type { TopicDetail, TopicSummary } from "@/types/topic";
@@ -9,9 +9,8 @@ import { IS_STATIC } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 const REPO_URL = "https://github.com/IRipollGonzalez/memorIRG";
-const ALL_VALUE = "__all__";
 
-type Step = "topic" | "category" | "subcategory" | "sides";
+type Step = "topic" | "category" | "sides";
 
 interface SidebarProps {
   topics: TopicSummary[];
@@ -49,18 +48,26 @@ export function Sidebar({
   starting,
 }: SidebarProps) {
   const [editingLevel, setEditingLevel] = useState<Step | null>(null);
+  // Whether the (optional) category/subcategory step has been confirmed via
+  // "Continue" — separate from category/subcategory themselves, since both
+  // can legitimately stay null ("All") without the step being "unfinished".
+  const [pastCategoryStep, setPastCategoryStep] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+
+  // A genuinely different topic always restarts the category/subcategory step.
+  useEffect(() => {
+    setPastCategoryStep(false);
+  }, [topic?.name]);
 
   const pairs = topic?.category_subcategory_pairs ?? [];
   const hasCategoriesForTopic = computeHasCategories(pairs);
+  const topicHasAnySubcategory = pairs.some((p) => p.subcategory !== null);
   const categories = uniqueCategories(pairs);
-  const subcategories = uniqueSubcategories(pairs, category);
-  const hasSubcategoriesForSelection = subcategories.length > 0;
+  const subcategoriesForSelectedCategory = uniqueSubcategories(pairs, category);
 
   function naturalStep(): Step {
     if (!topicName || !topic) return "topic";
-    if (hasCategoriesForTopic && category === null) return "category";
-    if (hasCategoriesForTopic && hasSubcategoriesForSelection && subcategory === null) return "subcategory";
+    if (hasCategoriesForTopic && !pastCategoryStep) return "category";
     return "sides";
   }
 
@@ -69,29 +76,26 @@ export function Sidebar({
   function handleEditLevel(step: Step) {
     // Re-opening an earlier level clears whatever came after it — the whole
     // point of tapping a breadcrumb is to redo everything from that point on.
-    if (step === "topic" || step === "category") onSubcategoryChange(null);
-    if (step === "topic") onCategoryChange(null);
+    if (step === "topic") {
+      onCategoryChange(null);
+      onSubcategoryChange(null);
+    }
+    if (step === "category") setPastCategoryStep(false);
     setEditingLevel(step);
   }
 
   const selectedTopicLabel = topics.find((t) => t.name === topicName)?.label ?? topicName ?? "";
   const noMatches = matchingCount === 0;
 
-  const breadcrumbs: { step: Step; heading: string; value: string }[] = [];
+  const breadcrumbs: { key: string; step: Step; heading: string; value: string }[] = [];
   if (activeStep !== "topic") {
-    breadcrumbs.push({ step: "topic", heading: "Topic", value: selectedTopicLabel });
+    breadcrumbs.push({ key: "topic", step: "topic", heading: "Topic", value: selectedTopicLabel });
   }
-  if (hasCategoriesForTopic && activeStep !== "topic" && activeStep !== "category") {
-    breadcrumbs.push({ step: "category", heading: "Category", value: category ?? "All" });
-  }
-  if (
-    hasCategoriesForTopic &&
-    hasSubcategoriesForSelection &&
-    activeStep !== "topic" &&
-    activeStep !== "category" &&
-    activeStep !== "subcategory"
-  ) {
-    breadcrumbs.push({ step: "subcategory", heading: "Subcategory", value: subcategory ?? "All" });
+  if (hasCategoriesForTopic && activeStep === "sides") {
+    breadcrumbs.push({ key: "category", step: "category", heading: "Category", value: category ?? "All" });
+    if (topicHasAnySubcategory) {
+      breadcrumbs.push({ key: "subcategory", step: "category", heading: "Subcategory", value: subcategory ?? "All" });
+    }
   }
 
   return (
@@ -126,7 +130,7 @@ export function Sidebar({
         <div className="flex flex-col gap-1.5">
           {breadcrumbs.map((crumb) => (
             <button
-              key={crumb.step}
+              key={crumb.key}
               type="button"
               onClick={() => handleEditLevel(crumb.step)}
               className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2.5 text-left transition-colors hover:bg-border/30"
@@ -157,40 +161,46 @@ export function Sidebar({
         )}
 
         {activeStep === "category" && (
-          <StepButtons
-            heading="Choose a category"
-            options={[{ value: ALL_VALUE, label: "All" }, ...categories.map((c) => ({ value: c, label: c }))]}
-            selected={category ?? ALL_VALUE}
-            onSelect={(value) => {
-              onCategoryChange(value === ALL_VALUE ? null : value);
-              setEditingLevel(null);
-            }}
-          />
-        )}
-
-        {activeStep === "subcategory" && (
-          <StepButtons
-            heading="Choose a subcategory"
-            options={[{ value: ALL_VALUE, label: "All" }, ...subcategories.map((s) => ({ value: s, label: s }))]}
-            selected={subcategory ?? ALL_VALUE}
-            onSelect={(value) => {
-              onSubcategoryChange(value === ALL_VALUE ? null : value);
-              setEditingLevel(null);
-            }}
-          />
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-medium text-foreground">Filter by category</p>
+            {topicHasAnySubcategory ? (
+              <div className="grid grid-cols-2 gap-3">
+                <FilterColumn
+                  label="Category"
+                  options={categories}
+                  selected={category}
+                  onSelect={(value) => onCategoryChange(category === value ? null : value)}
+                />
+                <FilterColumn
+                  label="Subcategory"
+                  options={subcategoriesForSelectedCategory}
+                  selected={subcategory}
+                  onSelect={(value) => onSubcategoryChange(subcategory === value ? null : value)}
+                  emptyHint={category === null ? "Pick a category first" : "No subcategories here"}
+                />
+              </div>
+            ) : (
+              <FilterColumn
+                label="Category"
+                options={categories}
+                selected={category}
+                onSelect={(value) => onCategoryChange(category === value ? null : value)}
+              />
+            )}
+          </div>
         )}
 
         {activeStep === "sides" && topic && (
           <div className="flex flex-col gap-3">
             <p className="text-sm font-medium text-foreground">Choose your sides</p>
             <div className="grid grid-cols-2 gap-3">
-              <SideColumn
+              <FilterColumn
                 label="Side 1 (shown first)"
                 options={topic.content_labels}
                 selected={side1}
                 onSelect={onSide1Change}
               />
-              <SideColumn
+              <FilterColumn
                 label="Side 2 (revealed on flip)"
                 options={topic.content_labels}
                 selected={side2}
@@ -205,6 +215,19 @@ export function Sidebar({
         <p className="rounded-md bg-negative/10 px-3 py-2 text-sm text-negative">
           No cards match the current filters.
         </p>
+      )}
+
+      {activeStep === "category" && (
+        <Button
+          className="mt-auto h-14 w-full text-lg md:h-10 md:text-base"
+          size="lg"
+          onClick={() => {
+            setPastCategoryStep(true);
+            setEditingLevel(null);
+          }}
+        >
+          Continue
+        </Button>
       )}
 
       {activeStep === "sides" && (
@@ -259,40 +282,51 @@ function StepButtons({
   );
 }
 
-function SideColumn({
+/** Shared by the sides step (never empty, no toggle-off) and the
+ * category/subcategory step (can be empty, taps toggle on/off since both
+ * filters are optional and "nothing selected" already means "All"). */
+function FilterColumn({
   label,
   options,
   selected,
   onSelect,
+  emptyHint,
 }: {
   label: string;
   options: string[];
   selected: string | null;
   onSelect: (value: string) => void;
+  emptyHint?: string;
 }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-      <div className="flex flex-col gap-2">
-        {options.map((option) => {
-          const isSelected = option === selected;
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => onSelect(option)}
-              className={cn(
-                "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
-                isSelected
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-surface text-foreground hover:bg-surface-raised",
-              )}
-            >
-              {option}
-            </button>
-          );
-        })}
-      </div>
+      {options.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground">
+          {emptyHint ?? "None available"}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {options.map((option) => {
+            const isSelected = option === selected;
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => onSelect(option)}
+                className={cn(
+                  "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                  isSelected
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-surface text-foreground hover:bg-surface-raised",
+                )}
+              >
+                {option}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -306,7 +340,7 @@ function Code({ children }: { children: React.ReactNode }) {
  * doesn't involve GitHub at all. */
 function AddCardsHelp() {
   return (
-    <div className="flex-1 overflow-y-auto text-sm text-muted-foreground">
+    <div className="overflow-y-auto text-sm text-muted-foreground">
       <p className="mb-2.5 leading-relaxed">
         <span className="font-medium text-foreground">Want to add a new topic?</span> Go to{" "}
         <a

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { formatRelativeTime, loadRecentSessions, saveRecentSession } from "@/lib/recentSessions";
+import { formatRelativeTime, loadRecentSessions, removeRecentSession, saveRecentSession } from "@/lib/recentSessions";
 import type { RecentSession } from "@/lib/recentSessions";
 
 function entry(overrides: Partial<RecentSession> = {}): RecentSession {
@@ -45,6 +45,25 @@ describe("saveRecentSession", () => {
     expect(recents[0].topicName).toBe("topic-11");
     expect(recents.some((r) => r.topicName === "topic-0")).toBe(false);
     expect(recents.some((r) => r.topicName === "topic-1")).toBe(false);
+  });
+});
+
+describe("removeRecentSession", () => {
+  it("removes only the matching entry", () => {
+    saveRecentSession(entry({ topicName: "languages" }));
+    saveRecentSession(entry({ topicName: "art" }));
+
+    const recents = removeRecentSession(entry({ topicName: "languages" }));
+
+    expect(recents).toHaveLength(1);
+    expect(recents[0].topicName).toBe("art");
+    expect(loadRecentSessions()).toHaveLength(1);
+  });
+
+  it("is a no-op when nothing matches", () => {
+    saveRecentSession(entry({ topicName: "languages" }));
+    const recents = removeRecentSession(entry({ topicName: "does-not-exist" }));
+    expect(recents).toHaveLength(1);
   });
 });
 
