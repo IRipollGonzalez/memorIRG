@@ -31,7 +31,7 @@ export function hasCategories(pairs: CategorySubcategoryPair[]): boolean {
 }
 
 /** Whether any card in the topic matches the current category/subcategory
- * selection — used to disable Start Session when a filter combination is
+ * selection — used to disable Play when a filter combination is
  * empty. Counts distinct (category, subcategory) pairs, not cards, since
  * that's all the API exposes; any nonzero match implies at least one card. */
 export function matchingPairCount(

@@ -42,12 +42,6 @@ export function StudyPage() {
   const previousCard = usePreviousCard();
 
   useEffect(() => {
-    if (topics.length > 0 && topicName === null) {
-      setTopicName(topics[0].name);
-    }
-  }, [topics, topicName]);
-
-  useEffect(() => {
     if (!topic) return;
 
     const pending = pendingResumeRef.current;

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Info } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Info } from "lucide-react";
 
 import type { TopicDetail, TopicSummary } from "@/types/topic";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { IS_STATIC } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 const REPO_URL = "https://github.com/IRipollGonzalez/memorIRG";
+const ALL_CATEGORIES = "__all__";
 
 interface SidebarProps {
   topics: TopicSummary[];
@@ -26,9 +27,12 @@ interface SidebarProps {
   starting: boolean;
 }
 
-/** Every selector (topic, category, sides) is visible and directly editable
- * at once — no step-by-step wizard, no "Continue" gate. The only action
- * button is "Start Session" at the bottom. */
+type Phase = "choosing" | "ready";
+
+/** Topic (+ category, when the topic has any) is one step: picking a
+ * category — or a topic with no categories at all — collapses it down to a
+ * compact summary and reveals the sides step below, with "Play" as the only
+ * action button. Tapping the summary reopens the choosing step. */
 export function Sidebar({
   topics,
   topicName,
@@ -45,17 +49,59 @@ export function Sidebar({
   starting,
 }: SidebarProps) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [phase, setPhase] = useState<Phase>("choosing");
+  // Whether the user has actually tapped a category option for the
+  // *current* topic yet — kept separate from `category` itself, since
+  // `category === null` means both "nothing chosen" and "All" was chosen.
+  const [categoryChosen, setCategoryChosen] = useState(false);
+  const prevTopicNameRef = useRef<string | null>(null);
 
   const pairs = topic?.category_subcategory_pairs ?? [];
   const hasCategoriesForTopic = hasCategories(pairs);
   const categories = uniqueCategories(pairs);
 
+  useEffect(() => {
+    setCategoryChosen(false);
+  }, [topicName]);
+
+  // A newly-loaded topic with no categories has nothing left to pick before
+  // sides — collapse straight to the sides step once its detail arrives.
+  useEffect(() => {
+    if (!topic) return;
+    const isNewTopic = prevTopicNameRef.current !== topic.name;
+    prevTopicNameRef.current = topic.name;
+    if (isNewTopic && !hasCategories(topic.category_subcategory_pairs)) {
+      setPhase("ready");
+    }
+  }, [topic]);
+
   const topicOptions = topics.map((t) => ({ value: t.name, label: t.label }));
-  const categoryOptions = categories.map((c) => ({ value: c, label: c }));
+  const categoryOptions = [
+    { value: ALL_CATEGORIES, label: "All" },
+    ...categories.map((c) => ({ value: c, label: c })),
+  ];
   const sideOptions = (topic?.content_labels ?? []).map((l) => ({ value: l, label: l }));
 
+  function handleTopicSelect(value: string) {
+    onTopicChange(value);
+    // Re-picking the same topic when it has no category step won't trigger
+    // the "new topic" effect above (nothing actually changed) — collapse now.
+    if (value === topicName && !hasCategoriesForTopic) {
+      setPhase("ready");
+    }
+  }
+
+  function handleCategorySelect(value: string) {
+    onCategoryChange(value === ALL_CATEGORIES ? null : value);
+    setCategoryChosen(true);
+    setPhase("ready");
+  }
+
+  const selectedTopicLabel = topics.find((t) => t.name === topicName)?.label ?? topicName ?? "";
   const noMatches = matchingCount === 0;
   const canStart = !!topic && !!side1 && !!side2 && !noMatches && !starting;
+  const showSides = phase === "ready" && !!topic;
+  const heading = topicName && hasCategoriesForTopic ? "Choose a topic and category" : "Choose a topic";
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -85,25 +131,31 @@ export function Sidebar({
         )}
       </div>
 
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-medium text-foreground">
-          {hasCategoriesForTopic ? "Choose a topic and category" : "Choose a topic"}
-        </p>
-        <div className={hasCategoriesForTopic ? "grid grid-cols-2 gap-3" : ""}>
-          <FilterColumn label="Topic" options={topicOptions} selected={topicName} onSelect={onTopicChange} />
+      {phase === "ready" ? (
+        <div className="flex flex-col gap-1.5">
+          <SummaryRow heading="Topic" value={selectedTopicLabel} onClick={() => setPhase("choosing")} />
           {hasCategoriesForTopic && (
-            <FilterColumn
-              label="Category"
-              options={categoryOptions}
-              selected={category}
-              onSelect={(value) => onCategoryChange(category === value ? null : value)}
-              emptyHint="No categories"
-            />
+            <SummaryRow heading="Category" value={category ?? "All"} onClick={() => setPhase("choosing")} />
           )}
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-foreground">{heading}</p>
+          <div className={topicName && hasCategoriesForTopic ? "grid grid-cols-2 gap-3" : ""}>
+            <FilterColumn label="Topic" options={topicOptions} selected={topicName} onSelect={handleTopicSelect} />
+            {topicName && hasCategoriesForTopic && (
+              <FilterColumn
+                label="Category"
+                options={categoryOptions}
+                selected={categoryChosen ? (category ?? ALL_CATEGORIES) : null}
+                onSelect={handleCategorySelect}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
-      {topic && (
+      {showSides && (
         <div className="flex flex-col gap-3">
           <p className="text-sm font-medium text-foreground">Choose your sides</p>
           <div className="grid grid-cols-2 gap-3">
@@ -118,22 +170,40 @@ export function Sidebar({
         </div>
       )}
 
-      {noMatches && (
+      {showSides && noMatches && (
         <p className="rounded-md bg-negative/10 px-3 py-2 text-sm text-negative">
           No cards match the current filters.
         </p>
       )}
 
-      <Button className="mt-auto h-14 w-full text-lg md:h-10 md:text-base" size="lg" disabled={!canStart} onClick={onStart}>
-        {starting ? "Starting…" : "Start Session"}
-      </Button>
+      {showSides && (
+        <Button className="mt-auto h-14 w-full text-lg md:h-10 md:text-base" size="lg" disabled={!canStart} onClick={onStart}>
+          {starting ? "Starting…" : "Play"}
+        </Button>
+      )}
     </div>
   );
 }
 
-/** Options render inside a fixed-height box once there are enough to
- * scroll, so a long list (e.g. many topics or categories) never pushes the
- * rest of the page around — the scrolling stays contained to the box. */
+function SummaryRow({ heading, value, onClick }: { heading: string; value: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2.5 text-left transition-colors hover:bg-border/30"
+    >
+      <span className="flex flex-col gap-0.5">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{heading}</span>
+        <span className="text-sm font-medium text-foreground">{value}</span>
+      </span>
+      <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+    </button>
+  );
+}
+
+/** Options render inside a box capped at 6 items tall — shorter when there
+ * are fewer, and scrollable internally once there are more, so a long list
+ * (e.g. many categories) never pushes the rest of the page around. */
 function FilterColumn({
   label,
   options,
@@ -155,7 +225,7 @@ function FilterColumn({
           {emptyHint ?? "None available"}
         </p>
       ) : (
-        <div className="flex max-h-56 flex-col gap-2 overflow-y-auto rounded-xl border border-border p-2">
+        <div className="flex max-h-[21rem] flex-col gap-2 overflow-y-auto rounded-xl border border-border p-2">
           {options.map((option) => {
             const isSelected = option.value === selected;
             return (

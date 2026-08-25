@@ -56,7 +56,7 @@ export function FlashcardView({ session, onFlip, onNext, onPrevious, onOpenDeck,
       >
         <CardsMark className="mb-1 h-36 w-36 sm:h-40 sm:w-40" />
         <p className="font-serif text-2xl font-medium text-foreground sm:text-xl">Tap to choose a topic</p>
-        <p className="text-base text-muted-foreground sm:text-sm">Then press Start Session to begin.</p>
+        <p className="text-base text-muted-foreground sm:text-sm">Then press Play to begin.</p>
       </div>
     );
   }
