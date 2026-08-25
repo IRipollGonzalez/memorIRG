@@ -3,9 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/icon.png" />
+    <!-- iOS "Add to Home Screen" reads this, not the favicon — must be a
+         plain opaque PNG (no transparency, iOS supplies its own rounded mask). -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MemorIRG</title>
     <meta name="description" content="Drop a CSV in, get a shuffled study deck out." />
+    <meta name="apple-mobile-web-app-title" content="MemorIRG" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

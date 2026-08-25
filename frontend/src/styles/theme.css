@@ -1,28 +1,29 @@
-/* Design tokens for MemorIRG — warm parchment neutrals (not stock gray),
-   with one oxblood/terracotta accent used sparingly for primary actions,
-   active state, links, and focus rings. Shared with the sibling projects'
-   token set rather than invented fresh for this app. */
+/* Design tokens for MemorIRG — warm white neutrals (not stock gray), with
+   one steel-blue accent used sparingly for primary actions, active state,
+   links, and focus rings. Same token architecture as the sibling
+   projects' shared palette, re-hued for this app rather than copied. */
 
 :root {
   /* Surfaces */
-  --bg: #f6f1e6;
-  --surface: #fffcf5;
-  --surface-raised: #ffffff;
-  --border: rgb(56 42 22 / 14%);
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --surface-raised: #f2efe8;
+  --border: rgb(40 38 34 / 12%);
 
   /* Text */
-  --text: #241d13;
-  --text-muted: #6d6152;
+  --text: #26251f;
+  --text-muted: #6c675d;
 
   /* Accent — one color, used sparingly (primary actions, active nav, links, focus rings) */
-  --accent: #8a3324;
-  --accent-hover: #74291d;
-  --accent-foreground: #fdf6ee;
+  --accent: #4c6f93;
+  --accent-hover: #3d5a79;
+  --accent-foreground: #f7fafc;
 
-  /* Semantic — separate from the accent, not the accent reused */
-  --positive: #3f7a4f;
+  /* Semantic — separate from the accent, not the accent reused. --info
+     deliberately isn't another blue, so it never gets mistaken for accent. */
+  --positive: #3f7a52;
   --negative: #b2402a;
-  --info: #3d6b8a;
+  --info: #4a7a72;
   --warning: #a3711f;
 
   /* Flashcard sides — distinct backgrounds so flipping reads as a real
@@ -47,36 +48,36 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #17130d;
-    --surface: #201a12;
-    --surface-raised: #262019;
-    --border: rgb(240 227 204 / 12%);
-    --text: #ece4d4;
-    --text-muted: #a89a83;
-    --accent: #d1875a;
-    --accent-hover: #dd9a70;
-    --accent-foreground: #1c1108;
-    --positive: #74b481;
+    --bg: #16181a;
+    --surface: #1e2124;
+    --surface-raised: #26292d;
+    --border: rgb(230 235 240 / 10%);
+    --text: #e9ebee;
+    --text-muted: #9a9da5;
+    --accent: #8fb0d6;
+    --accent-hover: #a3c0e0;
+    --accent-foreground: #10181f;
+    --positive: #74b48b;
     --negative: #dd8468;
-    --info: #7fb0cf;
+    --info: #7fbdae;
     --warning: #d3a24f;
     --shadow-elevated: 0 12px 32px -12px rgb(0 0 0 / 50%);
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #17130d;
-  --surface: #201a12;
-  --surface-raised: #262019;
-  --border: rgb(240 227 204 / 12%);
-  --text: #ece4d4;
-  --text-muted: #a89a83;
-  --accent: #d1875a;
-  --accent-hover: #dd9a70;
-  --accent-foreground: #1c1108;
-  --positive: #74b481;
+  --bg: #16181a;
+  --surface: #1e2124;
+  --surface-raised: #26292d;
+  --border: rgb(230 235 240 / 10%);
+  --text: #e9ebee;
+  --text-muted: #9a9da5;
+  --accent: #8fb0d6;
+  --accent-hover: #a3c0e0;
+  --accent-foreground: #10181f;
+  --positive: #74b48b;
   --negative: #dd8468;
-  --info: #7fb0cf;
+  --info: #7fbdae;
   --warning: #d3a24f;
   --shadow-elevated: 0 12px 32px -12px rgb(0 0 0 / 50%);
 }

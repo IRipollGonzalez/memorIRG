@@ -1,18 +1,17 @@
+import { useState } from "react";
+import { ChevronDown, Info } from "lucide-react";
+
 import type { TopicDetail, TopicSummary } from "@/types/topic";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { hasCategories as computeHasCategories, uniqueCategories, uniqueSubcategories } from "@/lib/topicFilters";
 import { IS_STATIC } from "@/lib/env";
+import { cn } from "@/lib/utils";
 
 const REPO_URL = "https://github.com/IRipollGonzalez/memorIRG";
-
 const ALL_VALUE = "__all__";
+
+type Step = "topic" | "category" | "subcategory" | "sides";
 
 interface SidebarProps {
   topics: TopicSummary[];
@@ -49,141 +48,252 @@ export function Sidebar({
   onStart,
   starting,
 }: SidebarProps) {
+  const [editingLevel, setEditingLevel] = useState<Step | null>(null);
+  const [infoOpen, setInfoOpen] = useState(false);
+
   const pairs = topic?.category_subcategory_pairs ?? [];
-  const hasCategories = computeHasCategories(pairs);
+  const hasCategoriesForTopic = computeHasCategories(pairs);
   const categories = uniqueCategories(pairs);
   const subcategories = uniqueSubcategories(pairs, category);
+  const hasSubcategoriesForSelection = subcategories.length > 0;
 
+  function naturalStep(): Step {
+    if (!topicName || !topic) return "topic";
+    if (hasCategoriesForTopic && category === null) return "category";
+    if (hasCategoriesForTopic && hasSubcategoriesForSelection && subcategory === null) return "subcategory";
+    return "sides";
+  }
+
+  const activeStep = editingLevel ?? naturalStep();
+
+  function handleEditLevel(step: Step) {
+    // Re-opening an earlier level clears whatever came after it — the whole
+    // point of tapping a breadcrumb is to redo everything from that point on.
+    if (step === "topic" || step === "category") onSubcategoryChange(null);
+    if (step === "topic") onCategoryChange(null);
+    setEditingLevel(step);
+  }
+
+  const selectedTopicLabel = topics.find((t) => t.name === topicName)?.label ?? topicName ?? "";
   const noMatches = matchingCount === 0;
 
+  const breadcrumbs: { step: Step; heading: string; value: string }[] = [];
+  if (activeStep !== "topic") {
+    breadcrumbs.push({ step: "topic", heading: "Topic", value: selectedTopicLabel });
+  }
+  if (hasCategoriesForTopic && activeStep !== "topic" && activeStep !== "category") {
+    breadcrumbs.push({ step: "category", heading: "Category", value: category ?? "All" });
+  }
+  if (
+    hasCategoriesForTopic &&
+    hasSubcategoriesForSelection &&
+    activeStep !== "topic" &&
+    activeStep !== "category" &&
+    activeStep !== "subcategory"
+  ) {
+    breadcrumbs.push({ step: "subcategory", heading: "Subcategory", value: subcategory ?? "All" });
+  }
+
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <div className="flex flex-col gap-5 md:gap-4">
-        <Field label="Topic">
-          {/* value is never `undefined` (even before topics load) — Base UI
-              warns loudly if a Select flips from uncontrolled to controlled
-              once a real value arrives. */}
-          <Select value={topicName ?? ""} onValueChange={(value) => value && onTopicChange(value)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose a topic">
-                {(value: string | null) => topics.find((t) => t.name === value)?.label ?? "Choose a topic"}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {topics.map((t) => (
-                <SelectItem key={t.name} value={t.name}>
-                  {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-
-        {hasCategories && (
-          <>
-            <Field label="Category">
-              <Select
-                value={category ?? ALL_VALUE}
-                onValueChange={(value) => onCategoryChange(value === ALL_VALUE ? null : value)}
-              >
-                <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
-                  <SelectValue>{(value: string) => (value === ALL_VALUE ? "All" : value)}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL_VALUE}>All</SelectItem>
-                  {categories.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            {subcategories.length > 0 && (
-              <Field label="Subcategory">
-                <Select
-                  value={subcategory ?? ALL_VALUE}
-                  onValueChange={(value) => onSubcategoryChange(value === ALL_VALUE ? null : value)}
-                >
-                  <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
-                    <SelectValue>{(value: string) => (value === ALL_VALUE ? "All" : value)}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={ALL_VALUE}>All</SelectItem>
-                    {subcategories.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          </>
-        )}
-
-        {topic && (
-          <>
-            <Field label="Side 1 (shown first)">
-              <Select value={side1 ?? ""} onValueChange={(value) => value && onSide1Change(value)}>
-                <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {topic.content_labels.map((label) => (
-                    <SelectItem key={label} value={label}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <Field label="Side 2 (revealed on flip)">
-              <Select value={side2 ?? ""} onValueChange={(value) => value && onSide2Change(value)}>
-                <SelectTrigger className="h-11 w-full text-base md:h-8 md:text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {topic.content_labels.map((label) => (
-                    <SelectItem key={label} value={label}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </>
+    <div className="flex flex-1 flex-col gap-5">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm text-muted-foreground">Pick a topic and how you'd like to study it.</p>
+        {IS_STATIC && (
+          <Sheet open={infoOpen} onOpenChange={setInfoOpen}>
+            <SheetTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="shrink-0 rounded-full text-muted-foreground"
+                  aria-label="How to add new cards"
+                />
+              }
+            >
+              <Info className="size-4" />
+            </SheetTrigger>
+            <SheetContent side="center" className="gap-3 p-5">
+              <SheetHeader className="p-0">
+                <SheetTitle>Adding cards</SheetTitle>
+              </SheetHeader>
+              <AddCardsHelp />
+            </SheetContent>
+          </Sheet>
         )}
       </div>
 
-      {IS_STATIC && <AddCardsHelp />}
+      {breadcrumbs.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {breadcrumbs.map((crumb) => (
+            <button
+              key={crumb.step}
+              type="button"
+              onClick={() => handleEditLevel(crumb.step)}
+              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2.5 text-left transition-colors hover:bg-border/30"
+            >
+              <span className="flex flex-col gap-0.5">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {crumb.heading}
+                </span>
+                <span className="text-sm font-medium text-foreground">{crumb.value}</span>
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+            </button>
+          ))}
+        </div>
+      )}
 
-      {noMatches && (
+      <div className="flex flex-1 flex-col gap-3">
+        {activeStep === "topic" && (
+          <StepButtons
+            heading="Choose a topic"
+            options={topics.map((t) => ({ value: t.name, label: t.label }))}
+            selected={topicName}
+            onSelect={(value) => {
+              onTopicChange(value);
+              setEditingLevel(null);
+            }}
+          />
+        )}
+
+        {activeStep === "category" && (
+          <StepButtons
+            heading="Choose a category"
+            options={[{ value: ALL_VALUE, label: "All" }, ...categories.map((c) => ({ value: c, label: c }))]}
+            selected={category ?? ALL_VALUE}
+            onSelect={(value) => {
+              onCategoryChange(value === ALL_VALUE ? null : value);
+              setEditingLevel(null);
+            }}
+          />
+        )}
+
+        {activeStep === "subcategory" && (
+          <StepButtons
+            heading="Choose a subcategory"
+            options={[{ value: ALL_VALUE, label: "All" }, ...subcategories.map((s) => ({ value: s, label: s }))]}
+            selected={subcategory ?? ALL_VALUE}
+            onSelect={(value) => {
+              onSubcategoryChange(value === ALL_VALUE ? null : value);
+              setEditingLevel(null);
+            }}
+          />
+        )}
+
+        {activeStep === "sides" && topic && (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-medium text-foreground">Choose your sides</p>
+            <div className="grid grid-cols-2 gap-3">
+              <SideColumn
+                label="Side 1 (shown first)"
+                options={topic.content_labels}
+                selected={side1}
+                onSelect={onSide1Change}
+              />
+              <SideColumn
+                label="Side 2 (revealed on flip)"
+                options={topic.content_labels}
+                selected={side2}
+                onSelect={onSide2Change}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {activeStep === "sides" && noMatches && (
         <p className="rounded-md bg-negative/10 px-3 py-2 text-sm text-negative">
           No cards match the current filters.
         </p>
       )}
 
-      <Button
-        className="mt-auto h-14 w-full text-lg md:h-10 md:text-base"
-        size="lg"
-        disabled={!topic || noMatches || starting}
-        onClick={onStart}
-      >
-        {starting ? "Starting…" : "Start Session"}
-      </Button>
+      {activeStep === "sides" && (
+        <Button
+          className="mt-auto h-14 w-full text-lg md:h-10 md:text-base"
+          size="lg"
+          disabled={!topic || noMatches || starting}
+          onClick={onStart}
+        >
+          {starting ? "Starting…" : "Start Session"}
+        </Button>
+      )}
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function StepButtons({
+  heading,
+  options,
+  selected,
+  onSelect,
+}: {
+  heading: string;
+  options: { value: string; label: string }[];
+  selected: string | null;
+  onSelect: (value: string) => void;
+}) {
   return (
-    <label className="flex flex-col gap-2 md:gap-1.5">
-      <span className="text-sm font-medium text-muted-foreground md:text-xs">{label}</span>
-      {children}
-    </label>
+    <div className="flex flex-col gap-3">
+      <p className="text-sm font-medium text-foreground">{heading}</p>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {options.map((option) => {
+          const isSelected = option.value === selected;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onSelect(option.value)}
+              className={cn(
+                "shrink-0 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors md:py-2",
+                isSelected
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-surface text-foreground hover:bg-surface-raised",
+              )}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SideColumn({
+  label,
+  options,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  options: string[];
+  selected: string | null;
+  onSelect: (value: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <div className="flex flex-col gap-2">
+        {options.map((option) => {
+          const isSelected = option === selected;
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onSelect(option)}
+              className={cn(
+                "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                isSelected
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-surface text-foreground hover:bg-surface-raised",
+              )}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -191,12 +301,12 @@ function Code({ children }: { children: React.ReactNode }) {
   return <code className="rounded bg-muted px-1 py-0.5 text-xs text-foreground">{children}</code>;
 }
 
-/** Only shown on the static (GitHub Pages) build — the desktop/dev app's
+/** Only rendered on the static (GitHub Pages) build — the desktop/dev app's
  * equivalent instructions are "drop a CSV in data/ and reload", which
  * doesn't involve GitHub at all. */
 function AddCardsHelp() {
   return (
-    <div className="rounded-lg border border-border bg-secondary/40 px-4 py-3 text-sm text-muted-foreground">
+    <div className="flex-1 overflow-y-auto text-sm text-muted-foreground">
       <p className="mb-2.5 leading-relaxed">
         <span className="font-medium text-foreground">Want to add a new topic?</span> Go to{" "}
         <a

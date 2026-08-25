@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { FlashcardView } from "@/components/FlashcardView";
 import { RecentSessionsDock } from "@/components/RecentSessionsDock";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { matchingPairCount, resolveOtherSide } from "@/lib/topicFilters";
 import { loadRecentSessions, saveRecentSession } from "@/lib/recentSessions";
 import { cn } from "@/lib/utils";
@@ -16,12 +16,9 @@ import type { SessionState } from "@/types/session";
 
 function Logo({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary font-serif text-sm font-semibold text-primary-foreground md:size-8">
-        M
-      </div>
-      <span className="font-serif text-lg font-semibold tracking-tight">MemorIRG</span>
-    </div>
+    <span className={cn("block text-center font-serif text-lg font-semibold tracking-tight text-foreground", className)}>
+      MemorIRG
+    </span>
   );
 }
 
@@ -176,7 +173,6 @@ export function StudyPage() {
         <SheetContent side="full" className="gap-0 p-0 md:hidden">
           <SheetHeader className="border-b border-border p-5 pb-4">
             <SheetTitle className="font-serif text-2xl">Choose your deck</SheetTitle>
-            <SheetDescription className="text-base">Pick a topic and how you'd like to study it.</SheetDescription>
           </SheetHeader>
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-y-auto px-5 py-6">
             <Sidebar {...sidebarProps} />
