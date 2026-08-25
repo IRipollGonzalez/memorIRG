@@ -1,16 +1,14 @@
-import { useEffect, useState } from "react";
-import { ChevronDown, Info } from "lucide-react";
+import { useState } from "react";
+import { Info } from "lucide-react";
 
 import type { TopicDetail, TopicSummary } from "@/types/topic";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { hasCategories as computeHasCategories, uniqueCategories, uniqueSubcategories } from "@/lib/topicFilters";
+import { hasCategories, uniqueCategories } from "@/lib/topicFilters";
 import { IS_STATIC } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
 const REPO_URL = "https://github.com/IRipollGonzalez/memorIRG";
-
-type Step = "topic" | "category" | "sides";
 
 interface SidebarProps {
   topics: TopicSummary[];
@@ -19,8 +17,6 @@ interface SidebarProps {
   topic: TopicDetail | undefined;
   category: string | null;
   onCategoryChange: (category: string | null) => void;
-  subcategory: string | null;
-  onSubcategoryChange: (subcategory: string | null) => void;
   side1: string | null;
   side2: string | null;
   onSide1Change: (side: string) => void;
@@ -30,6 +26,9 @@ interface SidebarProps {
   starting: boolean;
 }
 
+/** Every selector (topic, category, sides) is visible and directly editable
+ * at once — no step-by-step wizard, no "Continue" gate. The only action
+ * button is "Start Session" at the bottom. */
 export function Sidebar({
   topics,
   topicName,
@@ -37,8 +36,6 @@ export function Sidebar({
   topic,
   category,
   onCategoryChange,
-  subcategory,
-  onSubcategoryChange,
   side1,
   side2,
   onSide1Change,
@@ -47,59 +44,21 @@ export function Sidebar({
   onStart,
   starting,
 }: SidebarProps) {
-  const [editingLevel, setEditingLevel] = useState<Step | null>(null);
-  // Whether the (optional) category/subcategory step has been confirmed via
-  // "Continue" — separate from category/subcategory themselves, since both
-  // can legitimately stay null ("All") without the step being "unfinished".
-  const [pastCategoryStep, setPastCategoryStep] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
 
-  // A genuinely different topic always restarts the category/subcategory step.
-  useEffect(() => {
-    setPastCategoryStep(false);
-  }, [topic?.name]);
-
   const pairs = topic?.category_subcategory_pairs ?? [];
-  const hasCategoriesForTopic = computeHasCategories(pairs);
-  const topicHasAnySubcategory = pairs.some((p) => p.subcategory !== null);
+  const hasCategoriesForTopic = hasCategories(pairs);
   const categories = uniqueCategories(pairs);
-  const subcategoriesForSelectedCategory = uniqueSubcategories(pairs, category);
 
-  function naturalStep(): Step {
-    if (!topicName || !topic) return "topic";
-    if (hasCategoriesForTopic && !pastCategoryStep) return "category";
-    return "sides";
-  }
+  const topicOptions = topics.map((t) => ({ value: t.name, label: t.label }));
+  const categoryOptions = categories.map((c) => ({ value: c, label: c }));
+  const sideOptions = (topic?.content_labels ?? []).map((l) => ({ value: l, label: l }));
 
-  const activeStep = editingLevel ?? naturalStep();
-
-  function handleEditLevel(step: Step) {
-    // Re-opening an earlier level clears whatever came after it — the whole
-    // point of tapping a breadcrumb is to redo everything from that point on.
-    if (step === "topic") {
-      onCategoryChange(null);
-      onSubcategoryChange(null);
-    }
-    if (step === "category") setPastCategoryStep(false);
-    setEditingLevel(step);
-  }
-
-  const selectedTopicLabel = topics.find((t) => t.name === topicName)?.label ?? topicName ?? "";
   const noMatches = matchingCount === 0;
-
-  const breadcrumbs: { key: string; step: Step; heading: string; value: string }[] = [];
-  if (activeStep !== "topic") {
-    breadcrumbs.push({ key: "topic", step: "topic", heading: "Topic", value: selectedTopicLabel });
-  }
-  if (hasCategoriesForTopic && activeStep === "sides") {
-    breadcrumbs.push({ key: "category", step: "category", heading: "Category", value: category ?? "All" });
-    if (topicHasAnySubcategory) {
-      breadcrumbs.push({ key: "subcategory", step: "category", heading: "Subcategory", value: subcategory ?? "All" });
-    }
-  }
+  const canStart = !!topic && !!side1 && !!side2 && !noMatches && !starting;
 
   return (
-    <div className="flex flex-1 flex-col gap-5">
+    <div className="flex flex-1 flex-col gap-6">
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm text-muted-foreground">Pick a topic and how you'd like to study it.</p>
         {IS_STATIC && (
@@ -126,165 +85,55 @@ export function Sidebar({
         )}
       </div>
 
-      {breadcrumbs.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          {breadcrumbs.map((crumb) => (
-            <button
-              key={crumb.key}
-              type="button"
-              onClick={() => handleEditLevel(crumb.step)}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface-raised px-3.5 py-2.5 text-left transition-colors hover:bg-border/30"
-            >
-              <span className="flex flex-col gap-0.5">
-                <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  {crumb.heading}
-                </span>
-                <span className="text-sm font-medium text-foreground">{crumb.value}</span>
-              </span>
-              <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
-            </button>
-          ))}
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-foreground">
+          {hasCategoriesForTopic ? "Choose a topic and category" : "Choose a topic"}
+        </p>
+        <div className={hasCategoriesForTopic ? "grid grid-cols-2 gap-3" : ""}>
+          <FilterColumn label="Topic" options={topicOptions} selected={topicName} onSelect={onTopicChange} />
+          {hasCategoriesForTopic && (
+            <FilterColumn
+              label="Category"
+              options={categoryOptions}
+              selected={category}
+              onSelect={(value) => onCategoryChange(category === value ? null : value)}
+              emptyHint="No categories"
+            />
+          )}
+        </div>
+      </div>
+
+      {topic && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-foreground">Choose your sides</p>
+          <div className="grid grid-cols-2 gap-3">
+            <FilterColumn label="Side 1 (shown first)" options={sideOptions} selected={side1} onSelect={onSide1Change} />
+            <FilterColumn
+              label="Side 2 (revealed on flip)"
+              options={sideOptions}
+              selected={side2}
+              onSelect={onSide2Change}
+            />
+          </div>
         </div>
       )}
 
-      <div className="flex flex-1 flex-col gap-3">
-        {activeStep === "topic" && (
-          <StepButtons
-            heading="Choose a topic"
-            options={topics.map((t) => ({ value: t.name, label: t.label }))}
-            selected={topicName}
-            onSelect={(value) => {
-              onTopicChange(value);
-              setEditingLevel(null);
-            }}
-          />
-        )}
-
-        {activeStep === "category" && (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm font-medium text-foreground">Filter by category</p>
-            {topicHasAnySubcategory ? (
-              <div className="grid grid-cols-2 gap-3">
-                <FilterColumn
-                  label="Category"
-                  options={categories}
-                  selected={category}
-                  onSelect={(value) => onCategoryChange(category === value ? null : value)}
-                />
-                <FilterColumn
-                  label="Subcategory"
-                  options={subcategoriesForSelectedCategory}
-                  selected={subcategory}
-                  onSelect={(value) => onSubcategoryChange(subcategory === value ? null : value)}
-                  emptyHint={category === null ? "Pick a category first" : "No subcategories here"}
-                />
-              </div>
-            ) : (
-              <FilterColumn
-                label="Category"
-                options={categories}
-                selected={category}
-                onSelect={(value) => onCategoryChange(category === value ? null : value)}
-              />
-            )}
-          </div>
-        )}
-
-        {activeStep === "sides" && topic && (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm font-medium text-foreground">Choose your sides</p>
-            <div className="grid grid-cols-2 gap-3">
-              <FilterColumn
-                label="Side 1 (shown first)"
-                options={topic.content_labels}
-                selected={side1}
-                onSelect={onSide1Change}
-              />
-              <FilterColumn
-                label="Side 2 (revealed on flip)"
-                options={topic.content_labels}
-                selected={side2}
-                onSelect={onSide2Change}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {activeStep === "sides" && noMatches && (
+      {noMatches && (
         <p className="rounded-md bg-negative/10 px-3 py-2 text-sm text-negative">
           No cards match the current filters.
         </p>
       )}
 
-      {activeStep === "category" && (
-        <Button
-          className="mt-auto h-14 w-full text-lg md:h-10 md:text-base"
-          size="lg"
-          onClick={() => {
-            setPastCategoryStep(true);
-            setEditingLevel(null);
-          }}
-        >
-          Continue
-        </Button>
-      )}
-
-      {activeStep === "sides" && (
-        <Button
-          className="mt-auto h-14 w-full text-lg md:h-10 md:text-base"
-          size="lg"
-          disabled={!topic || noMatches || starting}
-          onClick={onStart}
-        >
-          {starting ? "Starting…" : "Start Session"}
-        </Button>
-      )}
+      <Button className="mt-auto h-14 w-full text-lg md:h-10 md:text-base" size="lg" disabled={!canStart} onClick={onStart}>
+        {starting ? "Starting…" : "Start Session"}
+      </Button>
     </div>
   );
 }
 
-function StepButtons({
-  heading,
-  options,
-  selected,
-  onSelect,
-}: {
-  heading: string;
-  options: { value: string; label: string }[];
-  selected: string | null;
-  onSelect: (value: string) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm font-medium text-foreground">{heading}</p>
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {options.map((option) => {
-          const isSelected = option.value === selected;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onSelect(option.value)}
-              className={cn(
-                "shrink-0 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors md:py-2",
-                isSelected
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-surface text-foreground hover:bg-surface-raised",
-              )}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/** Shared by the sides step (never empty, no toggle-off) and the
- * category/subcategory step (can be empty, taps toggle on/off since both
- * filters are optional and "nothing selected" already means "All"). */
+/** Options render inside a fixed-height box once there are enough to
+ * scroll, so a long list (e.g. many topics or categories) never pushes the
+ * rest of the page around — the scrolling stays contained to the box. */
 function FilterColumn({
   label,
   options,
@@ -293,7 +142,7 @@ function FilterColumn({
   emptyHint,
 }: {
   label: string;
-  options: string[];
+  options: { value: string; label: string }[];
   selected: string | null;
   onSelect: (value: string) => void;
   emptyHint?: string;
@@ -302,26 +151,26 @@ function FilterColumn({
     <div className="flex flex-col gap-2">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
       {options.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground">
           {emptyHint ?? "None available"}
         </p>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex max-h-56 flex-col gap-2 overflow-y-auto rounded-xl border border-border p-2">
           {options.map((option) => {
-            const isSelected = option === selected;
+            const isSelected = option.value === selected;
             return (
               <button
-                key={option}
+                key={option.value}
                 type="button"
-                onClick={() => onSelect(option)}
+                onClick={() => onSelect(option.value)}
                 className={cn(
-                  "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                  "shrink-0 rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
                   isSelected
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-surface text-foreground hover:bg-surface-raised",
                 )}
               >
-                {option}
+                {option.label}
               </button>
             );
           })}

@@ -32,10 +32,6 @@ export function StudyPage() {
   const [side2, setSide2] = useState<string | null>(null);
   const [session, setSession] = useState<SessionState | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  // Forces the mobile deck picker's Sidebar to remount (fresh internal wizard
-  // step) every time it opens, rather than resuming wherever it was left —
-  // the underlying topic/category/subcategory values aren't touched by this.
-  const [wizardResetKey, setWizardResetKey] = useState(0);
   const [recents, setRecents] = useState<RecentSession[]>(() => loadRecentSessions());
   const pendingResumeRef = useRef<RecentSession | null>(null);
 
@@ -137,8 +133,6 @@ export function StudyPage() {
     topic,
     category,
     onCategoryChange: setCategory,
-    subcategory,
-    onSubcategoryChange: setSubcategory,
     side1,
     side2,
     onSide1Change: handleSide1Change,
@@ -177,19 +171,13 @@ export function StudyPage() {
         <Logo />
       </header>
 
-      <Sheet
-        open={sheetOpen}
-        onOpenChange={(open) => {
-          setSheetOpen(open);
-          if (open) setWizardResetKey((key) => key + 1);
-        }}
-      >
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="full" className="gap-0 p-0 md:hidden">
           <SheetHeader className="border-b border-border p-5 pb-4">
             <SheetTitle className="font-serif text-2xl">Choose your deck</SheetTitle>
           </SheetHeader>
           <div className="mx-auto flex w-full max-w-md flex-1 flex-col overflow-y-auto px-5 py-6">
-            <Sidebar key={wizardResetKey} {...sidebarProps} />
+            <Sidebar {...sidebarProps} />
           </div>
         </SheetContent>
       </Sheet>
