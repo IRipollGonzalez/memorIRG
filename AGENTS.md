@@ -80,23 +80,23 @@ frontend/
   public/media/                  # image/audio files referenced by *_image / *_audio columns — public repo, see below
 desktop/                # launcher.py (8 lines, delegates to irg_core.runmode) + spec + build venv script
 seed/                   # neutral starter deck(s) shipped inside the app bundle (read-only)
-data/                   # PUBLIC content library in the repo: source of the GitHub Pages build only.
-                        # NOT the runtime data folder, and never bundled into the .app.
+library/                # PUBLIC content library in the repo (the decks of the GitHub Pages build).
+                        # NOT user data: the runtime decks live in Application Support, and this is never bundled.
 assets/                 # icon.icns, icon.png
 scripts/
-  build_topics_json.py   # data/*.csv -> frontend/src/data/topics.json, for the static build only
+  build_topics_json.py   # library/*.csv -> frontend/src/data/topics.json, for the static build only
 tests/
   unit/                 # domain, services — no I/O
   integration/           # repositories (temp dirs), API (FastAPI TestClient)
   fixtures/               # sample CSVs for integration tests
-.github/workflows/deploy-pages.yml  # rebuilds + republishes the static build on every push to data/ or frontend/
+.github/workflows/deploy-pages.yml  # rebuilds + republishes the static build on every push to library/ or frontend/
 build_desktop.sh
 pyproject.toml
 ```
 
 ## Key design decisions
 
-**CSV as the only data store** — No database, no ORM, no migrations. Every `*.csv` in `data/` is a topic; every non-metadata column is a possible card side. This is the app's whole reason for existing over a generic flashcard app, and it's cheap enough (a handful of small hand-edited files) that a database would add ceremony without benefit. `topics_repository.py` caches parsed topics by `(path, mtime)` so repeated requests in a session don't re-parse an unchanged file.
+**CSV as the only data store** — No database, no ORM, no migrations. Every `*.csv` in the decks folder (and in the public `library/`) is a topic; every non-metadata column is a possible card side. This is the app's whole reason for existing over a generic flashcard app, and it's cheap enough (a handful of small hand-edited files) that a database would add ceremony without benefit. `topics_repository.py` caches parsed topics by `(path, mtime)` so repeated requests in a session don't re-parse an unchanged file.
 
 **Sessions live in server-side memory, not a database** — `session_store.py` is a plain in-memory dict keyed by a UUID, populated by `session_service.create_session()`. This matches the original app's behavior: closing MemorIRG loses the current session's shuffle/position by design. It works because this is a single-user local app — the backend process's lifetime already matches "one user, one session."
 
@@ -123,7 +123,7 @@ pyproject.toml
 
 Never in the repo and never inside the bundle. Override with `MEMORIRG_DATA_DIR` or `IRG_DATA_DIR` (the *root* folder; decks go in its `data/`). irg_core refuses folders inside a git repo, an `.app` or iCloud Drive. One-time import of the old repo `data/` into the dev folder: `irg-build adopt --identity backend.config:IDENTITY data` (copies, never moves).
 
-The `.app` ships only `seed/example.csv`. On first launch it is copied once into the user's data folder (marker `.seeded`: if the user deletes it, it never comes back). Every launch takes a daily zip snapshot of the decks in `backups/`. `data/` in the repo is the public content library that the static Pages build is generated from; it is not shipped in the app.
+The `.app` ships only `seed/example.csv`. On first launch it is copied once into the user's data folder (marker `.seeded`: if the user deletes it, it never comes back). Every launch takes a daily zip snapshot of the decks in `backups/`. `library/` in the repo (formerly `data/`) is the public content library that the static Pages build is generated from; it is not shipped in the app.
 
 ## Desktop app (native macOS)
 
@@ -163,7 +163,7 @@ Live at **https://iripollgonzalez.github.io/memorIRG/** — a fully static build
 ```text
 push to main
   → pip install -e .                        (backend needed only to parse CSVs)
-  → python scripts/build_topics_json.py      (data/*.csv -> frontend/src/data/topics.json)
+  → python scripts/build_topics_json.py      (library/*.csv -> frontend/src/data/topics.json)
   → npm ci --prefix frontend
   → npm run build:static --prefix frontend   (vite build --mode static, base=/memorIRG/)
   → actions/upload-pages-artifact + actions/deploy-pages
@@ -184,7 +184,7 @@ npm --prefix frontend run preview -- --base=/memorIRG/
 
 **Dev / desktop app**: drop a `*.csv` file into `~/Library/Application Support/MemorIRG-dev/data/` (dev) or `~/Library/Application Support/MemorIRG/data/` (packaged app) and reload the page — no code change, no restart. `topics_repository`'s mtime-based cache picks up new/changed files automatically.
 
-**Web app (GitHub Pages)**: there's no server to reload — drop the CSV into the repo's public `data/` library, commit, and push to `main`. The Actions workflow above regenerates `topics.json` and redeploys automatically (usually live within a minute or two of the push).
+**Web app (GitHub Pages)**: there's no server to reload — drop the CSV into the repo's public `library/`, commit, and push to `main`. The Actions workflow above regenerates `topics.json` and redeploys automatically (usually live within a minute or two of the push).
 
 Both paths share the same rule: reserved column names are `category`, `subcategory` (case-insensitive); every other column becomes a content label the user can pick as Side 1 or Side 2; a topic needs at least 2 non-metadata columns.
 
@@ -198,7 +198,7 @@ Name a column with one of these suffixes and its cell values render as media ins
 | `*_youtube` | embedded YouTube player | a video ID, a full `youtube.com/watch?v=...` or `youtu.be/...` URL |
 | `*_audio` | `<audio controls>` | filename in `frontend/public/media/`, or a full `http(s)://` URL |
 
-Example `data/art.csv`:
+Example `library/art.csv`:
 
 ```csv
 category,artist,artwork_image

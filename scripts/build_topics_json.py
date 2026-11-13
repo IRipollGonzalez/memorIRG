@@ -1,4 +1,4 @@
-"""Regenerates frontend/src/data/topics.json from data/*.csv, for the
+"""Regenerates frontend/src/data/topics.json from library/*.csv, for the
 static (GitHub Pages) build only — the desktop/dev app reads CSVs at
 request time through the backend instead. Reuses topics_repository's
 parsing/cleaning so the static build behaves identically to the backend.
@@ -18,7 +18,7 @@ from backend.repositories import topics_repository  # noqa: E402
 OUTPUT = PROJECT_ROOT / "frontend" / "src" / "data" / "topics.json"
 
 # The public content library in the repo — not any user's runtime data folder.
-topics_repository.DATA_DIR = PROJECT_ROOT / "data"
+topics_repository.DATA_DIR = PROJECT_ROOT / "library"
 
 
 def main() -> None:

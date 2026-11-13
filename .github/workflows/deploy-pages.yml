@@ -1,15 +1,15 @@
 name: Deploy to GitHub Pages
 
 # The static build has no backend — scripts/build_topics_json.py bakes
-# data/*.csv into frontend/src/data/topics.json at build time (reusing the
+# library/*.csv into frontend/src/data/topics.json at build time (reusing the
 # real backend's CSV parsing), and the frontend runs entirely client-side
-# in "static" mode (see frontend/src/lib/env.ts). Any push to data/ or
+# in "static" mode (see frontend/src/lib/env.ts). Any push to library/ or
 # frontend/ rebuilds and republishes automatically.
 on:
   push:
     branches: [main]
     paths:
-      - "data/**"
+      - "library/**"
       - "frontend/**"
       - "backend/**"
       - "scripts/build_topics_json.py"
@@ -38,7 +38,7 @@ jobs:
       - name: Install backend (for topics.json generation only)
         run: pip install -e .
 
-      - name: Generate frontend/src/data/topics.json from data/*.csv
+      - name: Generate frontend/src/data/topics.json from library/*.csv
         run: python scripts/build_topics_json.py
 
       - uses: actions/setup-node@v4

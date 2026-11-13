@@ -1,6 +1,6 @@
 # MemorIRG
 
-A local-first flashcard app. Drop a CSV into `data/`, and every column that isn't `category`/`subcategory` becomes a possible card side — study world capitals, art history, vocabulary across three languages, or any other paired-fact list, without touching code.
+A local-first flashcard app. Drop a CSV into your decks folder (`~/Library/Application Support/MemorIRG/data/`), and every column that isn't `category`/`subcategory` becomes a possible card side — study world capitals, art history, vocabulary across three languages, or any other paired-fact list, without touching code.
 
 **Play it on your phone: https://iripollgonzalez.github.io/memorIRG/**
 
@@ -32,8 +32,8 @@ Open the URL Vite prints (typically http://localhost:5173).
 
 ## Adding a topic
 
-- **Dev / desktop app**: drop a `*.csv` file into `data/` and reload the page.
-- **Phone / web app**: drop the CSV into `data/`, commit, and push to `main` — a GitHub Actions workflow rebuilds and redeploys the site automatically.
+- **Dev / desktop app**: drop a `*.csv` file into the decks folder (`~/Library/Application Support/MemorIRG/data/`, or `MemorIRG-dev` in development) and reload the page.
+- **Phone / web app**: drop the CSV into the repo's public `library/`, commit, and push to `main` — a GitHub Actions workflow rebuilds and redeploys the site automatically.
 
 Either way: the filename becomes the topic name (`world_capitals.csv` → "World Capitals"). Columns named `category`/`subcategory` (case-insensitive) become filters; every other column becomes a possible card side. A topic needs at least 2 non-metadata columns.
 

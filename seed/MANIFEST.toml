@@ -1,0 +1,9 @@
+# What this app ships as starter data. See irg_core docs (seed standard):
+# only generic product configuration or a tiny sample, never the owner's decks.
+version = 1
+
+[[file]]
+path = "example.csv"
+kind = "sample-content"
+reason = "a six-card sample deck written for the product so the first screen is not empty"
+reviewed_neutral = true
