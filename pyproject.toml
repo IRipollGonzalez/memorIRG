@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "memorirg"
 version = "1.0.0"
-description = "Local-first flashcard app: drop a CSV in data/, study it as a shuffled flip deck."
+description = "Local-first flashcard app: drop a CSV in your decks folder, study it as a shuffled flip deck."
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115.0",
