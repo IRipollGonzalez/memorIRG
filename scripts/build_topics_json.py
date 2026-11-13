@@ -17,6 +17,9 @@ from backend.repositories import topics_repository  # noqa: E402
 
 OUTPUT = PROJECT_ROOT / "frontend" / "src" / "data" / "topics.json"
 
+# The public content library in the repo — not any user's runtime data folder.
+topics_repository.DATA_DIR = PROJECT_ROOT / "data"
+
 
 def main() -> None:
     topics = [dataclasses.asdict(topics_repository.load_topic(name)) for name in topics_repository.list_topic_files()]

@@ -1,0 +1,6 @@
+# irg_core is installed separately (not in pyproject.toml): the GitHub Pages CI only needs
+# to parse CSVs, and a bare name here would be looked up on PyPI.
+# While there is no remote, use the local checkout (build from a clean tag: git -C ../irg_core describe).
+-e ../irg_core[server,desktop,keychain,build]
+# Once irg_core has a git remote, pin by tag instead:
+# irg_core[server,desktop,keychain,build] @ git+ssh://git@github.com/<user>/irg_core.git@v0.1.7

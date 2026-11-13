@@ -1,4 +1,4 @@
-"""Reads and cleans CSV files from DATA_DIR into Topic domain objects.
+"""Reads and cleans CSV files from the data folder into Topic domain objects.
 CSV is the only data store for this app — see CLAUDE.md's 'CSV as the only
 data store' note. The cleaning pipeline (UTF-8 with latin-1 fallback,
 lowercased column names, stripped cells, dropped blank/duplicate rows)
@@ -13,7 +13,6 @@ import io
 import uuid
 from pathlib import Path
 
-from backend.config import DATA_DIR
 from backend.domain.exceptions import InvalidTopicDataError, TopicNotFoundError
 from backend.domain.models import RESERVED_METADATA_COLUMNS, FlashcardRecord, Topic
 from backend.domain.validators import validate_min_content_columns
@@ -21,9 +20,22 @@ from backend.utils.text import filename_to_label
 
 _cache: dict[Path, tuple[float, Topic]] = {}
 
+# Set explicitly by the static-site build and by tests. When None the app's configured data
+# folder is used; importing backend.config pulls in irg_core, which the GitHub Pages CI
+# (it only parses CSVs) neither has nor needs.
+DATA_DIR: Path | None = None
+
+
+def _data_dir() -> Path:
+    if DATA_DIR is not None:
+        return DATA_DIR
+    from backend.config import DATA_DIR as configured
+
+    return configured
+
 
 def list_topic_files() -> dict[str, Path]:
-    return {p.stem: p for p in sorted(DATA_DIR.glob("*.csv"))}
+    return {p.stem: p for p in sorted(_data_dir().glob("*.csv"))}
 
 
 def _read_rows(path: Path) -> list[dict[str, str]]:
