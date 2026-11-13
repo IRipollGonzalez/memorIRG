@@ -1,8 +1,14 @@
 from __future__ import annotations
 
-import pytest
+import os
+import tempfile
 
-from backend.domain.models import FlashcardRecord
+# Before any backend import: tests must never touch the real Application Support folders.
+os.environ["IRG_DATA_DIR"] = os.path.join(tempfile.mkdtemp(prefix="memorirg-test-"), "app")
+
+import pytest  # noqa: E402
+
+from backend.domain.models import FlashcardRecord  # noqa: E402
 
 
 @pytest.fixture

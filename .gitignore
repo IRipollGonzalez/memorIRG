@@ -13,4 +13,8 @@ build/
 dist/
 
 .env
+*.db
+*.db-wal
+*.db-shm
+summary.json
 .DS_Store
