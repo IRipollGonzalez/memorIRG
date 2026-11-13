@@ -8,9 +8,10 @@ def main() -> int:
     from irg_core.runmode import run
 
     from backend.config import IDENTITY
-    from backend.main import app
 
-    return run(IDENTITY, app)
+    # Given as an import string: the app is imported in the background thread, after the
+    # window exists, so a slow import (or a macOS dialog) never delays the window.
+    return run(IDENTITY, "backend.main:app")
 
 
 if __name__ == "__main__":

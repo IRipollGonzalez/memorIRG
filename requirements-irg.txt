@@ -3,4 +3,4 @@
 # While there is no remote, use the local checkout (build from a clean tag: git -C ../irg_core describe).
 -e ../irg_core[server,desktop,keychain,build]
 # Once irg_core has a git remote, pin by tag instead:
-# irg_core[server,desktop,keychain,build] @ git+ssh://git@github.com/<user>/irg_core.git@v0.1.3
+# irg_core[server,desktop,keychain,build] @ git+ssh://git@github.com/<user>/irg_core.git@v0.1.6
